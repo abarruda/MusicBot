@@ -7,7 +7,7 @@
     <artifactId>musicbot</artifactId>
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
-    <name>roomt2bot</name>
+    <name>musicbot</name>
 
     <developers>
         <developer>
@@ -78,7 +78,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <mainClass>com.abarruda.room2bot.BotServer</mainClass>
+                    <mainClass>com.abarruda.musicbot.BotServer</mainClass>
                     <arguments>
                         <argument>${properties.file}</argument>
                     </arguments>
