@@ -1,0 +1,12 @@
+.DS_Store
+*.log
+*.properties
+responses.txt
+RemoteSystemsTempFiles
+.metadata
+.recommenders
+*.class
+classes
+.classpath
+.project
+.settings/
