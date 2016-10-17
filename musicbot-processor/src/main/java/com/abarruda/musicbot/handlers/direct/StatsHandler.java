@@ -13,6 +13,7 @@ import com.abarruda.musicbot.handlers.CommandUtil.Command;
 import com.abarruda.musicbot.items.TermResponse;
 import com.abarruda.musicbot.processor.responder.responses.BotResponse;
 import com.abarruda.musicbot.processor.responder.responses.TextResponse;
+import com.google.common.base.Strings;
 
 public class StatsHandler implements MessageHandler {
 	
@@ -48,8 +49,9 @@ public class StatsHandler implements MessageHandler {
 							responseString.append("# Sets: " + db.getSetCount(chatId));
 						}
 						
-						
-						
+						if (Strings.isNullOrEmpty(responseString.toString())) {
+							responseString.append("No information to display");
+						}
 						
 						return TextResponse.createResponse(
 								message.getChatId().toString(), 
