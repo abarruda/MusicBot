@@ -16,13 +16,15 @@
     </developers>
 
     <modules>
+        <module>musicbot-api</module>
     	<module>musicbot-processor</module>
+        <module>musicbot-util</module>
     </modules>
 
     <properties>
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.compiler.source>1.8</maven.compiler.source>
-        <properties.file>default.properties</properties.file>
+        <properties.file>dev.properties</properties.file>
     </properties>
 
 
@@ -72,17 +74,31 @@
                 <version>1.2.1</version>
                 <executions>
                     <execution>
+                        <id>bot</id>
                         <goals>
                             <goal>java</goal>
                         </goals>
+                        <configuration>
+                            <mainClass>com.abarruda.musicbot.BotServer</mainClass>
+                            <arguments>
+                                <argument>${properties.file}</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>api</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>com.abarruda.musicbot.api.ApiServer</mainClass>
+                            <arguments>
+                                <argument>${properties.file}</argument>
+                            </arguments>
+                        </configuration>
                     </execution>
                 </executions>
-                <configuration>
-                    <mainClass>com.abarruda.musicbot.BotServer</mainClass>
-                    <arguments>
-                        <argument>${properties.file}</argument>
-                    </arguments>
-                </configuration>
+                
             </plugin>
         </plugins>
     </build>

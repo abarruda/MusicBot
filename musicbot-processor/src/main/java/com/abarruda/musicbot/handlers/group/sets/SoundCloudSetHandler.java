@@ -30,8 +30,8 @@ public class SoundCloudSetHandler extends AbstractSetHandler {
 	public DetectedSet getSet() {
 		return new DetectedSet(SetType.SOUNDCLOUD, 
 				getUrl(this.message.getText(), entity), 
-				this.message.getDate(), 
-				this.message.getFrom());
+				this.message.getDate(),
+				getFromUser(this.message));
 	}
 
 }

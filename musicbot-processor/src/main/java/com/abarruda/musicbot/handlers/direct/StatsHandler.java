@@ -5,12 +5,12 @@ import java.util.concurrent.Callable;
 
 import org.telegram.telegrambots.api.objects.Message;
 
-import com.abarruda.musicbot.db.DatabaseFacade;
-import com.abarruda.musicbot.db.MongoDbFacade;
 import com.abarruda.musicbot.handlers.CommandUtil;
 import com.abarruda.musicbot.handlers.MessageHandler;
 import com.abarruda.musicbot.handlers.CommandUtil.Command;
 import com.abarruda.musicbot.items.TermResponse;
+import com.abarruda.musicbot.persistence.DatabaseFacade;
+import com.abarruda.musicbot.persistence.MongoDbFacade;
 import com.abarruda.musicbot.processor.responder.responses.BotResponse;
 import com.abarruda.musicbot.processor.responder.responses.TextResponse;
 import com.google.common.base.Strings;

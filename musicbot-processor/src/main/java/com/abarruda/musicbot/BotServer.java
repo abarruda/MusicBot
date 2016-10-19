@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 import org.telegram.telegrambots.TelegramBotsApi;
 import org.telegram.telegrambots.logging.BotLogger;
 
+import com.abarruda.musicbot.config.Config;
 import com.abarruda.musicbot.handlers.direct.FeedbackHandler;
 import com.abarruda.musicbot.handlers.direct.HelpMessageHandler;
 import com.abarruda.musicbot.handlers.direct.StatsHandler;

@@ -17,9 +17,9 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.telegram.telegrambots.api.objects.Message;
 
-import com.abarruda.musicbot.Config;
-import com.abarruda.musicbot.db.DatabaseFacade;
-import com.abarruda.musicbot.db.MongoDbFacade;
+import com.abarruda.musicbot.config.Config;
+import com.abarruda.musicbot.persistence.DatabaseFacade;
+import com.abarruda.musicbot.persistence.MongoDbFacade;
 import com.abarruda.musicbot.handlers.MessageHandler;
 import com.abarruda.musicbot.items.TermResponse;
 import com.abarruda.musicbot.processor.responder.responses.BotResponse;

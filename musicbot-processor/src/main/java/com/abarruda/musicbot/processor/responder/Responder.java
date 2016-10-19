@@ -58,7 +58,7 @@ public class Responder implements Runnable {
 				}
 			}
 		} catch (Exception e) {
-			logger.error("Can not send response!", e);
+			logger.error("Cannot send response!", e);
 		}
 		
 	}

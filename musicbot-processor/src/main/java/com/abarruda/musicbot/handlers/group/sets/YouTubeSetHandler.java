@@ -21,8 +21,8 @@ public class YouTubeSetHandler extends AbstractSetHandler {
 	public DetectedSet getSet() {
 		return new DetectedSet(SetType.YOUTUBE, 
 				getUrl(this.message.getText(), entity), 
-				this.message.getDate(), 
-				this.message.getFrom());
+				this.message.getDate(),
+				getFromUser(this.message));
 	}
 
 }

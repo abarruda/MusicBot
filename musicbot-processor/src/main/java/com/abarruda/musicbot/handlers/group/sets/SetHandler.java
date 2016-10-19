@@ -9,8 +9,8 @@ import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.MessageEntity;
 import org.telegram.telegrambots.api.objects.User;
 
-import com.abarruda.musicbot.db.DatabaseFacade;
-import com.abarruda.musicbot.db.MongoDbFacade;
+import com.abarruda.musicbot.persistence.DatabaseFacade;
+import com.abarruda.musicbot.persistence.MongoDbFacade;
 import com.abarruda.musicbot.handlers.MessageHandler;
 import com.abarruda.musicbot.items.DetectedSet;
 import com.abarruda.musicbot.items.MusicSet;
@@ -44,7 +44,7 @@ public class SetHandler implements MessageHandler {
 						final AbstractSetHandler setHandler = AbstractSetHandler.getHandler(message, entity);
 						final DetectedSet setInMessage = setHandler.getSet();
 						sets.add(setInMessage);
-						logger.info("Detected set by '" + setInMessage.user.getFirstName() + "': " + setInMessage.url);
+						logger.info("Detected set by '" + setInMessage.user.firstName + "': " + setInMessage.url);
 					} catch (MalformedURLException e) {
 						logger.error("Could not handle detected set!", e);
 					}

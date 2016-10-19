@@ -8,6 +8,7 @@ import org.telegram.telegrambots.api.objects.MessageEntity;
 
 import com.abarruda.musicbot.items.DetectedSet;
 import com.abarruda.musicbot.items.SetType;
+import com.abarruda.musicbot.items.User;
 
 public abstract class AbstractSetHandler {
 	
@@ -23,6 +24,13 @@ public abstract class AbstractSetHandler {
 	
 	protected static String getUrl(final String messageText, final MessageEntity entity) {
 		return messageText.substring(entity.getOffset(), entity.getOffset() + entity.getLength());
+	}
+	
+	protected static User getFromUser(final Message message) {
+		return new User(
+				message.getFrom().getId(),
+				message.getFrom().getFirstName(), 
+				message.getFrom().getLastName());
 	}
 	
 	private static SetType determineSetType(final String messageText, final MessageEntity entity) throws MalformedURLException {

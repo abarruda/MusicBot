@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-import com.abarruda.musicbot.db.DatabaseFacade;
-import com.abarruda.musicbot.db.MongoDbFacade;
+import com.abarruda.musicbot.persistence.DatabaseFacade;
+import com.abarruda.musicbot.persistence.MongoDbFacade;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;

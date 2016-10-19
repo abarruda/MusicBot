@@ -17,7 +17,7 @@ public class MiscellaneousURLHandler extends AbstractSetHandler {
 		return new DetectedSet(SetType.MISC, 
 				getUrl(this.message.getText(), entity), 
 				this.message.getDate(), 
-				this.message.getFrom());
+				getFromUser(this.message));
 	}
 
 }
