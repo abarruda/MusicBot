@@ -13,6 +13,7 @@ import com.abarruda.musicbot.handlers.direct.HelpMessageHandler;
 import com.abarruda.musicbot.handlers.direct.StatsHandler;
 import com.abarruda.musicbot.handlers.direct.TermResponseInputHandler;
 import com.abarruda.musicbot.handlers.group.ChatManagerHandler;
+import com.abarruda.musicbot.handlers.group.LoggingHandler;
 import com.abarruda.musicbot.handlers.group.SimpleResponseHandler;
 import com.abarruda.musicbot.handlers.group.sets.SetHandler;
 import com.abarruda.musicbot.processor.LongPollingProcessor;
@@ -40,6 +41,7 @@ public class BotServer {
 		processor.addGroupHandler(new ChatManagerHandler());
 		processor.addGroupHandler(new SimpleResponseHandler());
 		processor.addGroupHandler(new SetHandler());
+		processor.addGroupHandler(new LoggingHandler());
 		
 		processor.addPrivateHandler(new HelpMessageHandler());
 		processor.addPrivateHandler(new FeedbackHandler());

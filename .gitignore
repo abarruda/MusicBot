@@ -11,3 +11,4 @@ classes
 .project
 .settings/
 target/
+logging

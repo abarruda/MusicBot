@@ -18,6 +18,8 @@ private static final Logger logger = LogManager.getLogger(Config.class);
 	public static String DATABASE_NAME = "db.name";
 	public static String AUTORESPONSE_DURATION = "handler.autoresponse.duration";
 	
+	public static String LOGGING_FILE_LOCATION = "logging.dir";
+	
 	public static void initializeConfigs(String propertyFile) {
 		try {
 			FileInputStream input = new FileInputStream(propertyFile); 
