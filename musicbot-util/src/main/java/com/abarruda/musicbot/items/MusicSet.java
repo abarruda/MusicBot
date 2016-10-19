@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.bson.Document;
 
-import jersey.repackaged.com.google.common.collect.Lists;
+import com.google.common.collect.Lists;
 
 public class MusicSet {
 	public String _id;

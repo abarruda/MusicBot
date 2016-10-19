@@ -50,11 +50,6 @@
     </build>
 
     <dependencies>
-    	<dependency>
-    		<groupId>com.github.rubenlagus</groupId>
-    		<artifactId>TelegramBots</artifactId>
-    		<version>v2.3.3.3</version>
-    	</dependency>
 	    <dependency>
 	        <groupId>org.mongodb</groupId>
 	        <artifactId>mongodb-driver</artifactId>

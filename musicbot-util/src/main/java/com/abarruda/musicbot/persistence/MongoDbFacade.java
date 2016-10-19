@@ -160,9 +160,9 @@ public class MongoDbFacade implements DatabaseFacade {
 		List<Document> setDocumentsToBeInserted = Lists.newArrayList();
 		for (final DetectedSet set : sets) {
 			try {
-				final Document user = new Document().append("userId", set.user.getId())
-						.append("firstName", set.user.getFirstName())
-						.append("lastName", set.user.getLastName());
+				final Document user = new Document().append("userId", set.user.userId)
+						.append("firstName", set.user.firstName)
+						.append("lastName", set.user.lastName);
 				
 				final Document newSet = new Document("_id", new ObjectId());
 				newSet.append("url", set.url);
@@ -180,9 +180,9 @@ public class MongoDbFacade implements DatabaseFacade {
 	@Override
 	public void updateSetReference(String chatId, DetectedSet set) {
 		try {
-			final Document user = new Document().append("userId", set.user.getId())
-					.append("firstName", set.user.getFirstName())
-					.append("lastName", set.user.getLastName());
+			final Document user = new Document().append("userId", set.user.userId)
+					.append("firstName", set.user.firstName)
+					.append("lastName", set.user.lastName);
 			
 			final Document newReference = new Document("user", user);
 			newReference.append("date", set.date);

@@ -1,7 +1,5 @@
 package com.abarruda.musicbot.items;
 
-import org.telegram.telegrambots.api.objects.User;
-
 public class DetectedSet {
 	public SetType type;
 	public String url;
