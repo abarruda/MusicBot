@@ -25,6 +25,7 @@ import com.abarruda.musicbot.items.TermResponse;
 import com.abarruda.musicbot.processor.responder.responses.BotResponse;
 import com.abarruda.musicbot.processor.responder.responses.TextResponse;
 import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
@@ -82,8 +83,8 @@ public class SimpleResponseHandler implements MessageHandler {
 			String line = null;
 			while ((line = br.readLine()) != null) {
 				final Iterable<String> result = Splitter.on("==").trimResults().split(line);
-				String trigger = result.iterator().next();
-				String response = result.iterator().next();
+				final String trigger = Iterables.getFirst(result, null);
+				final String response = Iterables.getLast(result);
 				loadedResponses.put(trigger, response);
 			}
 			
