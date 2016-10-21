@@ -5,7 +5,6 @@ import static java.util.Arrays.asList;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -19,7 +18,6 @@ import com.abarruda.musicbot.items.RemoteContent;
 import com.abarruda.musicbot.items.TermResponse;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -154,11 +152,11 @@ public class MongoDbFacade implements DatabaseFacade {
 	}
 	
 	@Override
-	public Set<RemoteContent> getRemoteContent(final String chatId) {
+	public List<RemoteContent> getRemoteContent(final String chatId) {
 		final MongoCollection<Document> collection = getRemoteContentCollection(chatId);
 		final MongoCursor<Document> cursor = collection.find().iterator();
 		
-		final Set<RemoteContent> remoteContent = Sets.newHashSet();
+		final List<RemoteContent> remoteContent = Lists.newArrayList();
 		while (cursor.hasNext()) {
 			final Document doc = cursor.next();
 			remoteContent.add(RemoteContent.getSetFromDoc(doc));

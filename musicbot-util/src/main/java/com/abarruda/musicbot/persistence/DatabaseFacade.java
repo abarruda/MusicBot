@@ -2,7 +2,6 @@ package com.abarruda.musicbot.persistence;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.abarruda.musicbot.items.DetectedSet;
 import com.abarruda.musicbot.items.MusicSet;
@@ -31,7 +30,7 @@ public interface DatabaseFacade {
 	
 	public void updateSetReference(final String chatId, final DetectedSet set);
 	
-	public Set<RemoteContent> getRemoteContent(final String chatId);
+	public List<RemoteContent> getRemoteContent(final String chatId);
 	
 	public List<TermResponse> getTermResponses(final String chatId);
 	

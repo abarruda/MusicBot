@@ -30,5 +30,10 @@ public class RemoteContent {
 		}
 		return set;
 	}
+	
+	@Override
+	public String toString() {
+		return this.url;
+	}
 
 }

@@ -25,9 +25,13 @@ public abstract class SetsResource {
     		@PathParam(value = "id")
     		final String id, 
     		
-    		@ApiParam(value = "", required = false)
+    		@ApiParam(value = "User ID to filter by", required = false)
     		@QueryParam(value = "userId")
-    		final String user);
+    		final String user,
+    		
+    		@ApiParam(value = "", required = false)
+    		@QueryParam(value = "orderByReferenceCount")
+    		final boolean orderByReferenceCount);
 
 
 }
