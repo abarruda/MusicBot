@@ -2,9 +2,11 @@ package com.abarruda.musicbot.persistence;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.abarruda.musicbot.items.DetectedSet;
 import com.abarruda.musicbot.items.MusicSet;
+import com.abarruda.musicbot.items.RemoteContent;
 import com.abarruda.musicbot.items.TermResponse;
 
 public interface DatabaseFacade {
@@ -28,6 +30,8 @@ public interface DatabaseFacade {
 	public void insertSets(final String chatId, final List<DetectedSet> sets);
 	
 	public void updateSetReference(final String chatId, final DetectedSet set);
+	
+	public Set<RemoteContent> getRemoteContent(final String chatId);
 	
 	public List<TermResponse> getTermResponses(final String chatId);
 	

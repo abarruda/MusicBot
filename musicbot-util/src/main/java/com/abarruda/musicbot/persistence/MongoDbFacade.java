@@ -5,6 +5,7 @@ import static java.util.Arrays.asList;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -14,9 +15,11 @@ import org.bson.types.ObjectId;
 import com.abarruda.musicbot.config.Config;
 import com.abarruda.musicbot.items.DetectedSet;
 import com.abarruda.musicbot.items.MusicSet;
+import com.abarruda.musicbot.items.RemoteContent;
 import com.abarruda.musicbot.items.TermResponse;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -148,6 +151,19 @@ public class MongoDbFacade implements DatabaseFacade {
 		} else {
 			return MusicSet.getSetFromDoc(dbDoc);
 		}
+	}
+	
+	@Override
+	public Set<RemoteContent> getRemoteContent(final String chatId) {
+		final MongoCollection<Document> collection = getRemoteContentCollection(chatId);
+		final MongoCursor<Document> cursor = collection.find().iterator();
+		
+		final Set<RemoteContent> remoteContent = Sets.newHashSet();
+		while (cursor.hasNext()) {
+			final Document doc = cursor.next();
+			remoteContent.add(RemoteContent.getSetFromDoc(doc));
+		}
+		return remoteContent;
 	}
 	
 	@Override

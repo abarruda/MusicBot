@@ -4,9 +4,8 @@ import javax.ws.rs.core.Response;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.jhades.JHades;
 
-//import com.abarruda.musicbot.config.Config;
+import com.abarruda.musicbot.config.Config;
 
 import io.github.mikexliu.stack.server.StackServer;
 
@@ -18,10 +17,8 @@ public class ApiServer {
 	private StackServer server;
 	
 	private ApiServer() {
-		new JHades().overlappingJarsReport();
 		
-		//int port = Integer.valueOf(Config.getConfig(Config.API_PORT));
-		int port = 12121;
+		int port = Integer.valueOf(Config.getConfig(Config.API_PORT));
 		server = null;
 		
 		try {
@@ -51,7 +48,7 @@ public class ApiServer {
 	}
 	
 	public static void main(String[] args) {
-		//Config.initializeConfigs(args[0]);
+		Config.initializeConfigs(args[0]);
 		
 		final ApiServer server = new ApiServer();
 		try {
