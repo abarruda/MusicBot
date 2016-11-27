@@ -21,6 +21,7 @@ import com.google.common.collect.Lists;
 import jersey.repackaged.com.google.common.collect.Sets;
 
 import java.net.MalformedURLException;
+import java.util.Date;
 import java.util.List;
 
 public class SetHandler implements MessageHandler {
@@ -79,11 +80,19 @@ public class SetHandler implements MessageHandler {
 								// Update the DB
 								db.updateSetReference(chatId, set);
 								
+								
 								// Send the message to the outgoing queue
 								final int referenceCount = trackedSet.references.size() + 1 + 1; // +1 for the original post, +1 for this post
-								final String messageText = "'" + trackedSet.url +  "' was originally posted by " + trackedSet.originalUser.firstName + ".  Referenced " 
-			                    		+ referenceCount + " time(s).";
-								messagesToSend.add(messageText);								
+								final StringBuilder messageText = new StringBuilder();
+								messageText.append(trackedSet.url);
+								messageText.append(" was originally posted by ");
+								messageText.append(trackedSet.originalUser.firstName);
+								messageText.append(" on ");
+								messageText.append(new Date(trackedSet.originalDate * 1000L));
+								messageText.append(".  Referenced ");
+								messageText.append(referenceCount);
+								messageText.append(" time(s).");
+								messagesToSend.add(messageText.toString());								
 							}
 						} catch (Exception e) {
 							logger.error(e);
