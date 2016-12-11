@@ -84,7 +84,10 @@ public class MetadataScraper implements Runnable {
 
 		@Override
 		public void run() {
-			if (this.set.metadata.isEmpty() || this.allSets) {
+			if (
+				(this.set.metadata.isEmpty() && !this.set.status.equals(MusicSet.Status.INACTIVE.name())) // Sets that don't have metadata and are ACTIVE 
+				|| this.allSets // OR all sets
+					) {
 				logger.info("Processing metadata for " + this.set.url);
 				
 				Document doc = null;
@@ -96,12 +99,12 @@ public class MetadataScraper implements Runnable {
 				
 				if (getStatusOfSet(doc) == MusicSet.Status.ACTIVE) {
 					final MusicSet.Metadata metadata = getMetadata(doc);
-					logger.info(metadata.toDoc().toJson());
+					logger.info("Retrieved metadata for " + this .set.url + ": " + metadata.toDoc().toJson());
 					// update metadata
 					db.updateSetMetadata(this.chatId, this.set, metadata);
 					db.updateSetStatus(chatId, set, MusicSet.Status.ACTIVE);
 				} else {
-					logger.info("Set has gone INACTIVE: " + set.metadata.title + " (" + set.url + ")");
+					logger.info("Set is INACTIVE: " + set.url);
 					db.updateSetStatus(chatId, set, MusicSet.Status.INACTIVE);
 				}
 				
