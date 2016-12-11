@@ -17,6 +17,7 @@ import com.abarruda.musicbot.handlers.group.LoggingHandler;
 import com.abarruda.musicbot.handlers.group.SimpleResponseHandler;
 import com.abarruda.musicbot.handlers.group.sets.SetHandler;
 import com.abarruda.musicbot.processor.LongPollingProcessor;
+import com.abarruda.musicbot.processor.metadata.MusicSetMetadataProcessor;
 import com.abarruda.musicbot.processor.responder.Responder;
 import com.abarruda.musicbot.processor.responder.responses.BotResponse;
 import com.google.common.collect.Queues;
@@ -35,6 +36,8 @@ public class BotServer {
 		
 		// preload ChatManager caches
 		ChatManager.getChatManager();
+		
+		new MusicSetMetadataProcessor().start();
 		
 		final TermResponseInputHandler autoResponder = new TermResponseInputHandler();
 		

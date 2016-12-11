@@ -14,7 +14,21 @@ public class User {
 	}
 	
 	public static User getUserFromDocument(Document doc) {
-		return new User(doc.getInteger("userId"), doc.getString("firstName"), doc.getString("lastName"));
+		return new User(doc.getInteger("userId"), 
+				doc.getString("firstName"), 
+				doc.getString("lastName"));
+	}
+	
+	public Document toDoc() {
+		return toDoc(this);
+	}
+	
+	public static Document toDoc(final User user) {
+		final Document doc = new Document();
+		doc.append("userId", user.userId)
+			.append("firstName", user.firstName)
+			.append("lastName", user.lastName);
+		return doc;
 	}
 
 }

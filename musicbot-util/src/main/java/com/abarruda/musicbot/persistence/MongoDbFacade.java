@@ -152,6 +152,20 @@ public class MongoDbFacade implements DatabaseFacade {
 	}
 	
 	@Override
+	public Map<MusicSet, String> getSets() {
+		final Map<MusicSet, String> allSets = Maps.newHashMap();
+		
+		for(final String chatId : getChatIds().keySet()) {
+			final MongoCursor<Document> cursor = getRemoteContentCollection(chatId).find().iterator();
+			while (cursor.hasNext()) {
+				allSets.put(MusicSet.getSetFromDoc(cursor.next()), chatId);
+			}
+		}
+		
+		return allSets;
+	}
+	
+	@Override
 	public List<RemoteContent> getRemoteContent(final String chatId) {
 		final MongoCollection<Document> collection = getRemoteContentCollection(chatId);
 		final MongoCursor<Document> cursor = collection.find().iterator();
@@ -189,6 +203,27 @@ public class MongoDbFacade implements DatabaseFacade {
 			}
 		}
 		getRemoteContentCollection(chatId).insertMany(setDocumentsToBeInserted);
+	}
+	
+	public void updateSetStatus(final String chatId, final MusicSet set, final MusicSet.Status status) {
+		final BasicDBObject update = new BasicDBObject("$set", new BasicDBObject(MusicSet.FIELD_STATUS, status.name()));
+		try {
+			final UpdateResult result = getRemoteContentCollection(chatId).updateOne(eq(MusicSet.FIELD_URL, set.url), update);
+			if (result.getMatchedCount() != 1 && result.getModifiedCount() != 1) {
+				logger.error("Could not find or update set status! [chatId: " + chatId + " , url: " + set.url + "]");
+			}
+		} catch (Exception e) {
+			logger.error("Error encountered updating status!", e);
+		}
+	}
+	
+	public void updateSetMetadata(final String chatId, final MusicSet set, final MusicSet.Metadata metadata) {
+		final BasicDBObject update = new BasicDBObject("$set", new BasicDBObject(MusicSet.FIELD_METADATA, metadata.toDoc()));
+		final UpdateResult result = getRemoteContentCollection(chatId).updateOne(eq(MusicSet.FIELD_URL, set.url), update);
+		
+		if (result.getMatchedCount() != 1 && result.getModifiedCount() != 1) {
+			logger.error("Could not find or update set metadata! [chatId: " + chatId + " , url: " + set.url + "]");
+		}
 	}
 
 	@Override

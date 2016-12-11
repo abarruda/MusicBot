@@ -24,9 +24,15 @@ public interface DatabaseFacade {
 	
 	public MusicSet getSet(final String chatId, final String url);
 	
+	public Map<MusicSet, String> getSets();
+	
 	public long getSetCount(final String chatId);
 	
 	public void insertSets(final String chatId, final List<DetectedSet> sets);
+	
+	public void updateSetStatus(final String chatId, final MusicSet set, final MusicSet.Status status);
+	
+	public void updateSetMetadata(final String chatId, final MusicSet set, final MusicSet.Metadata metadata);
 	
 	public void updateSetReference(final String chatId, final DetectedSet set);
 	

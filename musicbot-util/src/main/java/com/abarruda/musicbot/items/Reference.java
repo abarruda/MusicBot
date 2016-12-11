@@ -14,5 +14,16 @@ public class Reference {
 		reference.date = doc.getInteger("date");
 		return reference;
 	}
+	
+	public Document toDoc() {
+		return toDoc(this);
+	}
+	
+	public static Document toDoc(final Reference ref) {
+		final Document doc = new Document();
+		doc.append("user", ref.user.toDoc());
+		doc.append("date", ref.date);
+		return doc;
+	}
 
 }
