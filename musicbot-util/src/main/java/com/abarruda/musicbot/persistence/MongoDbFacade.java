@@ -190,25 +190,26 @@ public class MongoDbFacade implements DatabaseFacade {
 	}
 
 	@Override
-	public void insertRemoteContent(String chatId, List<DetectedContent> sets) {
-		List<Document> setDocumentsToBeInserted = Lists.newArrayList();
-		for (final DetectedContent set : sets) {
+	public void insertRemoteContent(String chatId, List<DetectedContent> remoteContent) {
+		List<Document> remoteContentDocumentsToInsert = Lists.newArrayList();
+		for (final DetectedContent content : remoteContent) {
 			try {
-				final Document user = new Document().append("userId", set.user.userId)
-						.append("firstName", set.user.firstName)
-						.append("lastName", set.user.lastName);
+				final Document user = new Document().append("userId", content.user.userId)
+						.append("firstName", content.user.firstName)
+						.append("lastName", content.user.lastName);
 				
 				final Document newSet = new Document("_id", new ObjectId());
-				newSet.append("url", set.url);
-				newSet.append("originalDate", set.date);
+				newSet.append("url", content.url);
+				newSet.append("type", content.type.name());
+				newSet.append("originalDate", content.date);
 				newSet.append("originalUser", user);
 				newSet.append("references", asList());
-				setDocumentsToBeInserted.add(newSet);
+				remoteContentDocumentsToInsert.add(newSet);
 			} catch (Exception e) {
 				logger.error(e);
 			}
 		}
-		getRemoteContentCollection(chatId).insertMany(setDocumentsToBeInserted);
+		getRemoteContentCollection(chatId).insertMany(remoteContentDocumentsToInsert);
 	}
 	
 	public void updateSetStatus(final String chatId, final MusicSet set, final MusicSet.Status status) {
