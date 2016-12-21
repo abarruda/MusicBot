@@ -12,9 +12,8 @@ import org.bson.Document;
 import org.bson.types.ObjectId;
 
 import com.abarruda.musicbot.config.Config;
-import com.abarruda.musicbot.items.DetectedSet;
+import com.abarruda.musicbot.items.DetectedContent;
 import com.abarruda.musicbot.items.MusicSet;
-import com.abarruda.musicbot.items.RemoteContent;
 import com.abarruda.musicbot.items.TermResponse;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -158,7 +157,10 @@ public class MongoDbFacade implements DatabaseFacade {
 		for(final String chatId : getChatIds().keySet()) {
 			final MongoCursor<Document> cursor = getRemoteContentCollection(chatId).find().iterator();
 			while (cursor.hasNext()) {
-				allSets.put(MusicSet.getSetFromDoc(cursor.next()), chatId);
+				final MusicSet set = MusicSet.getSetFromDoc(cursor.next());
+				if (set.isMusicSet()) {
+					allSets.put(set, chatId);
+				}
 			}
 		}
 		
@@ -166,16 +168,19 @@ public class MongoDbFacade implements DatabaseFacade {
 	}
 	
 	@Override
-	public List<RemoteContent> getRemoteContent(final String chatId) {
+	public List<MusicSet> getMusicSets(final String chatId) {
 		final MongoCollection<Document> collection = getRemoteContentCollection(chatId);
 		final MongoCursor<Document> cursor = collection.find().iterator();
 		
-		final List<RemoteContent> remoteContent = Lists.newArrayList();
+		final List<MusicSet> sets = Lists.newArrayList();
 		while (cursor.hasNext()) {
 			final Document doc = cursor.next();
-			remoteContent.add(RemoteContent.getSetFromDoc(doc));
+			final MusicSet musicSet = MusicSet.getSetFromDoc(doc);
+			if (musicSet.isMusicSet()) {
+				sets.add(musicSet);
+			}
 		}
-		return remoteContent;
+		return sets;
 	}
 	
 	@Override
@@ -184,9 +189,9 @@ public class MongoDbFacade implements DatabaseFacade {
 	}
 
 	@Override
-	public void insertSets(String chatId, List<DetectedSet> sets) {
+	public void insertSets(String chatId, List<DetectedContent> sets) {
 		List<Document> setDocumentsToBeInserted = Lists.newArrayList();
-		for (final DetectedSet set : sets) {
+		for (final DetectedContent set : sets) {
 			try {
 				final Document user = new Document().append("userId", set.user.userId)
 						.append("firstName", set.user.firstName)
@@ -227,7 +232,7 @@ public class MongoDbFacade implements DatabaseFacade {
 	}
 
 	@Override
-	public void updateSetReference(String chatId, DetectedSet set) {
+	public void updateSetReference(String chatId, DetectedContent set) {
 		try {
 			final Document user = new Document().append("userId", set.user.userId)
 					.append("firstName", set.user.firstName)

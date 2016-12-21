@@ -33,6 +33,7 @@ public class ApiServer {
 	                    Response.status(Response.Status.INTERNAL_SERVER_ERROR)
 	                            .build())
 	            .withPort(port)
+	            .withCorsEnabled()
 				.build();
 		} catch (Exception e) {
 			logger.fatal("Cannot start stack server!");

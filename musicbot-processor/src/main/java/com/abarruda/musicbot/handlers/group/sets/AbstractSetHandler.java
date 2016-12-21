@@ -6,7 +6,7 @@ import java.net.URL;
 import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.MessageEntity;
 
-import com.abarruda.musicbot.items.DetectedSet;
+import com.abarruda.musicbot.items.DetectedContent;
 import com.abarruda.musicbot.items.SetType;
 import com.abarruda.musicbot.items.User;
 
@@ -20,7 +20,7 @@ public abstract class AbstractSetHandler {
 		this.entity = entity;
 	}
 	
-	public abstract DetectedSet getSet();
+	public abstract DetectedContent getSet();
 	
 	protected static String getUrl(final String messageText, final MessageEntity entity) {
 		return messageText.substring(entity.getOffset(), entity.getOffset() + entity.getLength());

@@ -85,7 +85,7 @@ public class MetadataScraper implements Runnable {
 		@Override
 		public void run() {
 			if (
-				(this.set.metadata.isEmpty() && this.set.status == null) // Sets that don't have metadata and are new (status hasn't been determined) 
+				(this.set.metadata == null && this.set.status == null) // Sets that don't have metadata and are new (status hasn't been determined) 
 				|| this.allSets // OR all sets
 					) {
 				logger.info("Processing metadata for " + this.set.url);

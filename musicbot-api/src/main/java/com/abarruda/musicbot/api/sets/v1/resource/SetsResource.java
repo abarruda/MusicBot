@@ -7,7 +7,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import com.abarruda.musicbot.items.RemoteContent;
+import com.abarruda.musicbot.items.MusicSet;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -21,7 +21,7 @@ public abstract class SetsResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}")
-    public abstract Iterable<RemoteContent> getSetsByChatId(
+    public abstract Iterable<MusicSet> getSetsByChatId(
     		@PathParam(value = "id")
     		final String id, 
     		

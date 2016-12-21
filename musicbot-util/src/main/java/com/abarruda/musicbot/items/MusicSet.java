@@ -1,13 +1,10 @@
 package com.abarruda.musicbot.items;
 
-import java.util.List;
-
 import org.bson.Document;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 
-public class MusicSet {
+public class MusicSet extends RemoteContent {
 	
 	public static enum Status {
 		ACTIVE, INACTIVE;
@@ -18,13 +15,13 @@ public class MusicSet {
 		public String imageUrl;
 		
 		public static Metadata getMetadataFromDocument(final Document doc) {
-			final Metadata metadata = new Metadata();
-			
 			if (doc != null) {
+				final Metadata metadata = new Metadata();
 				metadata.title = doc.getString("title");
 				metadata.imageUrl = doc.getString("imageUrl");
+				return metadata;
 			}
-			return metadata;
+			return null;
 		}
 		
 		public boolean isEmpty() {
@@ -44,38 +41,26 @@ public class MusicSet {
 	}
 	
 	public final static String FIELD_METADATA = "metadata";
-	public final static String FIELD_ORIGINAL_DATE = "originalDate";
-	public final static String FIELD_ORIGINAL_USER = "originalUser";
-	public final static String FIELD_REFERENCES = "references";
 	public final static String FIELD_STATUS = "status";
-	public final static String FIELD_TYPE = "type";
-	public final static String FIELD_URL = "url";
 	
-	public String _id;
-	public String url;
-	public String type;
 	public String status;
-	public User originalUser;
-	public int originalDate;
 	public Metadata metadata;
-	public List<Reference> references;
+	
+	public MusicSet(final RemoteContent remoteContent, final String status, final Metadata metadata) {
+		super(remoteContent._id, remoteContent.url, remoteContent.type, remoteContent.originalUser,
+				remoteContent.originalDate, remoteContent.references);
+		this.status = status;
+		this.metadata = metadata;
+	}
+	
+	public boolean isMusicSet() {
+		return this.metadata != null;
+	}
 	
 	public static MusicSet getSetFromDoc(Document doc) {
-		final MusicSet set = new MusicSet();
-		set._id = doc.getObjectId("_id").toString();
-		set.url = doc.getString("url");
-		set.type = doc.getString("type");
-		set.status = doc.getString("status");
-		set.originalUser = User.getUserFromDocument(doc.get("originalUser", Document.class));
-		set.originalDate = doc.getInteger("originalDate");
-		set.metadata = Metadata.getMetadataFromDocument(doc.get("metadata", Document.class));
-		set.references = Lists.newArrayList();
-		@SuppressWarnings("unchecked")
-		final List<Document> references = (List<Document>)doc.get("references");
-		for (final Document reference : references) {
-			set.references.add(Reference.getReferenceFromDoc(reference));
-		}
-		return set;
+		final String status = doc.getString("status");
+		final Metadata metadata = Metadata.getMetadataFromDocument(doc.get("metadata", Document.class));
+		return new MusicSet(getRemoteContentFromDoc(doc), status, metadata);
 	}
 	
 	public Document toDoc() {
@@ -83,20 +68,10 @@ public class MusicSet {
 	}
 	
 	public static Document toDoc(final MusicSet set) {
-		final Document musicSetDoc = new Document("_id", set._id);
-		musicSetDoc.append(FIELD_URL, set.url);
-		musicSetDoc.append(FIELD_TYPE, set.type);
+		final Document musicSetDoc = RemoteContent.toDoc(
+				new RemoteContent(set._id, set.url, set.type, set.originalUser, set.originalDate, set.references ));
 		musicSetDoc.append(FIELD_STATUS, Strings.nullToEmpty(set.status));
-		musicSetDoc.append(FIELD_ORIGINAL_USER, set.originalUser.toDoc());
-		musicSetDoc.append(FIELD_ORIGINAL_DATE, set.originalDate);
 		musicSetDoc.append(FIELD_METADATA, set.metadata.toDoc());
-		
-		final List<Document> references = Lists.newArrayList();
-		for (final Reference ref : set.references) {
-			references.add(ref.toDoc());
-		}
-		musicSetDoc.append(FIELD_REFERENCES, references);
-		
 		return musicSetDoc;
 	}
 

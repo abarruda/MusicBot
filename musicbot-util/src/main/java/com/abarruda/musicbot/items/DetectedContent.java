@@ -1,12 +1,12 @@
 package com.abarruda.musicbot.items;
 
-public class DetectedSet {
+public class DetectedContent {
 	public SetType type;
 	public String url;
 	public int date;
 	public User user;
 	
-	public DetectedSet(final SetType type, final String url, final int date, final User user) {
+	public DetectedContent(final SetType type, final String url, final int date, final User user) {
 		this.type = type;
 		this.url = url;
 		this.date = date;

@@ -9,7 +9,7 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import com.abarruda.musicbot.api.sets.v1.resource.SetsResource;
-import com.abarruda.musicbot.items.RemoteContent;
+import com.abarruda.musicbot.items.MusicSet;
 import com.abarruda.musicbot.items.SetType;
 import com.abarruda.musicbot.persistence.DatabaseFacade;
 import com.abarruda.musicbot.persistence.MongoDbFacade;
@@ -27,9 +27,9 @@ public class SetsContainer extends SetsResource {
 	private static ImmutableSet<String> setUrls = ImmutableSet.copyOf(
 			Iterables.concat(SetType.SOUNDCLOUD.hostNames, SetType.YOUTUBE.hostNames));
 
-	private static final Predicate<RemoteContent> setPredicate = new Predicate<RemoteContent>() {
+	private static final Predicate<MusicSet> setPredicate = new Predicate<MusicSet>() {
 		@Override
-		public boolean apply(RemoteContent input) {
+		public boolean apply(MusicSet input) {
 			for (final String hostname : setUrls) {
 				if (input.url.contains(hostname))
 					return true;
@@ -38,40 +38,40 @@ public class SetsContainer extends SetsResource {
 		}
 	};
 	
-	private static final Comparator<RemoteContent> setOrdering = new Comparator<RemoteContent>() {
+	private static final Comparator<MusicSet> setOrdering = new Comparator<MusicSet>() {
 		@Override
-		public int compare(RemoteContent left, RemoteContent right) {
+		public int compare(MusicSet left, MusicSet right) {
 			return Ints.compare(left.references.size(), right.references.size());
 		}
 	}; 
 	
 	@Override
-	public Iterable<RemoteContent> getSetsByChatId(final String id, final String userId, final boolean orderByReferenceCount) {
+	public Iterable<MusicSet> getSetsByChatId(final String id, final String userId, final boolean orderByReferenceCount) {
 		
-		final List<Predicate<RemoteContent>> listOfPredicates = new ArrayList<Predicate<RemoteContent>>();
+		final List<Predicate<MusicSet>> listOfPredicates = new ArrayList<Predicate<MusicSet>>();
 		listOfPredicates.add(setPredicate);
 		
 		if (userId != null) {
-			listOfPredicates.add(new Predicate<RemoteContent>() {
+			listOfPredicates.add(new Predicate<MusicSet>() {
 				@Override
-				public boolean apply(RemoteContent input) {
+				public boolean apply(MusicSet input) {
 					return String.valueOf(input.originalUser.userId).equals(userId);
 				}
 			});
 		}
 		
 		final DatabaseFacade db = MongoDbFacade.getMongoDb();
-		final List<RemoteContent> remoteContent = db.getRemoteContent(id);
+		final List<MusicSet> musicSets = db.getMusicSets(id);
 		
-		final List<RemoteContent> filteredRemoteContent = Lists.newLinkedList(
-				Iterables.filter(remoteContent, 
+		final List<MusicSet> filteredMusicSets = Lists.newLinkedList(
+				Iterables.filter(musicSets, 
 						Predicates.and(listOfPredicates)));
 		
 		if (orderByReferenceCount) {
-			Collections.sort(filteredRemoteContent, Ordering.from(setOrdering).reversed()); 
+			Collections.sort(filteredMusicSets, Ordering.from(setOrdering).reversed()); 
 		}
 		
-		return filteredRemoteContent;
+		return filteredMusicSets;
 	}
 	
 }

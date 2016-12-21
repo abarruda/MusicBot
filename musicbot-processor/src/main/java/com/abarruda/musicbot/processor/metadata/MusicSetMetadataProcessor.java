@@ -22,7 +22,7 @@ public class MusicSetMetadataProcessor {
 	
 	public void start() {
 		// Schedule thread for sets without metadata
-		executor.scheduleAtFixedRate(MetadataScraper.doOnlyNewSets(), 30, 30, TimeUnit.SECONDS);
+		executor.scheduleAtFixedRate(MetadataScraper.doOnlyNewSets(), 10, 5, TimeUnit.SECONDS);
 		// schedule thread for sets with metadata that may need to be updated
 		executor.scheduleAtFixedRate(MetadataScraper.doAllSets(), 12, 24, TimeUnit.HOURS);
 	}

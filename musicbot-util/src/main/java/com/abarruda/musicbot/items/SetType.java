@@ -8,7 +8,7 @@ import com.google.common.collect.Lists;
 public enum SetType {
 	
 	SOUNDCLOUD("soundcloud.com", "www.soundcloud.com"),
-	YOUTUBE("youtube.com", "www.youtube.com"),
+	YOUTUBE("youtube.com", "www.youtube.com", "youtu.be"),
 	MISC("");
 	
 	public List<String> hostNames;

@@ -3,7 +3,7 @@ package com.abarruda.musicbot.handlers.group.sets;
 import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.MessageEntity;
 
-import com.abarruda.musicbot.items.DetectedSet;
+import com.abarruda.musicbot.items.DetectedContent;
 import com.abarruda.musicbot.items.SetType;
 
 public class MiscellaneousURLHandler extends AbstractSetHandler {
@@ -13,8 +13,8 @@ public class MiscellaneousURLHandler extends AbstractSetHandler {
 	}
 
 	@Override
-	public DetectedSet getSet() {
-		return new DetectedSet(SetType.MISC, 
+	public DetectedContent getSet() {
+		return new DetectedContent(SetType.MISC, 
 				getUrl(this.message.getText(), entity), 
 				this.message.getDate(), 
 				getFromUser(this.message));

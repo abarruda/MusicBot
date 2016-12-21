@@ -12,7 +12,7 @@ import org.telegram.telegrambots.api.objects.User;
 import com.abarruda.musicbot.persistence.DatabaseFacade;
 import com.abarruda.musicbot.persistence.MongoDbFacade;
 import com.abarruda.musicbot.handlers.MessageHandler;
-import com.abarruda.musicbot.items.DetectedSet;
+import com.abarruda.musicbot.items.DetectedContent;
 import com.abarruda.musicbot.items.MusicSet;
 import com.abarruda.musicbot.processor.responder.responses.BotResponse;
 import com.abarruda.musicbot.processor.responder.responses.TextResponse;
@@ -36,16 +36,17 @@ public class SetHandler implements MessageHandler {
 		db = MongoDbFacade.getMongoDb();
 	}
 		
-	private static Set<DetectedSet> getSets(final Message message, final User user) {
-		final Set<DetectedSet> sets = Sets.newHashSet();
+	private static Set<DetectedContent> getSets(final Message message, final User user) {
+		final Set<DetectedContent> sets = Sets.newHashSet();
 		if (message.getEntities() != null) {
 			for (final MessageEntity entity : message.getEntities()) {
 				if (entity.getType().equals(TYPE_URL)) {
 					try {
 						final AbstractSetHandler setHandler = AbstractSetHandler.getHandler(message, entity);
-						final DetectedSet setInMessage = setHandler.getSet();
+						final DetectedContent setInMessage = setHandler.getSet();
 						sets.add(setInMessage);
-						logger.info("Detected set by '" + setInMessage.user.firstName + "': " + setInMessage.url);
+						
+						logger.info("Detected '" + setInMessage.type.name() + "' by '" + setInMessage.user.firstName + "': " + setInMessage.url);
 					} catch (MalformedURLException e) {
 						logger.error("Could not handle detected set!", e);
 					}
@@ -63,13 +64,13 @@ public class SetHandler implements MessageHandler {
 			@Override
 			public BotResponse call() throws Exception {
 				
-				final Set<DetectedSet> sets = getSets(message, message.getFrom());
+				final Set<DetectedContent> sets = getSets(message, message.getFrom());
 				
 				if (sets.size() > 0) {
-					final List<DetectedSet> setsToBeInserted = Lists.newArrayList();
+					final List<DetectedContent> setsToBeInserted = Lists.newArrayList();
 					final List<String> messagesToSend = Lists.newArrayList();
 					
-					for(final DetectedSet set : sets) {
+					for(final DetectedContent set : sets) {
 						try {
 							final MusicSet trackedSet = db.getSet(chatId, set.url);
 							
@@ -106,7 +107,7 @@ public class SetHandler implements MessageHandler {
 					if (messagesToSend.size() > 0) {
 						final StringBuilder responseMessageText = new StringBuilder();
 						String delim = "";
-						for (String responseMessage : messagesToSend) {
+						for (final String responseMessage : messagesToSend) {
 							responseMessageText.append(delim);
 							responseMessageText.append(responseMessage);
 							delim = "\n";
