@@ -12,6 +12,7 @@ import org.bson.Document;
 import org.bson.types.ObjectId;
 
 import com.abarruda.musicbot.config.Config;
+import com.abarruda.musicbot.items.ContentType;
 import com.abarruda.musicbot.items.DetectedContent;
 import com.abarruda.musicbot.items.MusicSet;
 import com.abarruda.musicbot.items.RemoteContent;
@@ -158,9 +159,12 @@ public class MongoDbFacade implements DatabaseFacade {
 		for(final String chatId : getChatIds().keySet()) {
 			final MongoCursor<Document> cursor = getRemoteContentCollection(chatId).find().iterator();
 			while (cursor.hasNext()) {
-				final MusicSet set = MusicSet.getSetFromDoc(cursor.next());
-				if (set.isMusicSet()) {
-					allSets.put(set, chatId);
+				final Document doc = cursor.next();
+				final RemoteContent content = RemoteContent.getRemoteContentFromDoc(doc);
+				
+				// Only return remote content that has been detected as a Music Set
+				if (ContentType.isMusicSet(content.type)) {
+					allSets.put(MusicSet.getSetFromDoc(doc), chatId);
 				}
 			}
 		}
@@ -176,9 +180,11 @@ public class MongoDbFacade implements DatabaseFacade {
 		final List<MusicSet> sets = Lists.newArrayList();
 		while (cursor.hasNext()) {
 			final Document doc = cursor.next();
-			final MusicSet musicSet = MusicSet.getSetFromDoc(doc);
-			if (musicSet.isMusicSet()) {
-				sets.add(musicSet);
+			final RemoteContent content = RemoteContent.getRemoteContentFromDoc(doc);
+			
+			// Only return remote content that has been detected as a Music Set
+			if (ContentType.isMusicSet(content.type)) {
+				sets.add(MusicSet.getSetFromDoc(doc));
 			}
 		}
 		return sets;

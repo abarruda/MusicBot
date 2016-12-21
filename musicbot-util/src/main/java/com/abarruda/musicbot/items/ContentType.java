@@ -25,5 +25,14 @@ public enum ContentType {
 		}
 		return false;
 	}
+	
+	public static boolean isMusicSet(final String type) {
+		try {
+			final List<ContentType> musicContentTypes = Lists.newArrayList(SOUNDCLOUD, YOUTUBE);
+			return musicContentTypes.contains(ContentType.valueOf(type));
+		} catch (IllegalArgumentException | NullPointerException e) {
+			return false;
+		}
+	}
 
 }

@@ -53,10 +53,6 @@ public class MusicSet extends RemoteContent {
 		this.metadata = metadata;
 	}
 	
-	public boolean isMusicSet() {
-		return this.metadata != null;
-	}
-	
 	public static MusicSet getSetFromDoc(Document doc) {
 		final String status = doc.getString("status");
 		final Metadata metadata = Metadata.getMetadataFromDocument(doc.get("metadata", Document.class));
