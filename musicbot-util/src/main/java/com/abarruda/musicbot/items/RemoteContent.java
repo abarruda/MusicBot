@@ -73,7 +73,7 @@ public class RemoteContent {
 	
 	@Override
 	public String toString() {
-		return this.url;
+		return this._id + " : " + this.url;
 	}
 
 }

@@ -34,13 +34,8 @@ public abstract class AbstractRemoteContentHandler {
 	}
 	
 	private static ContentType determineContentType(final String messageText, final MessageEntity entity) throws MalformedURLException {
-		final URL url = new URL(messageText.substring(entity.getOffset(), entity.getOffset() + entity.getLength()));
-		for (ContentType type : ContentType.values()) {
-			if (type.isOfType(url)) {
-				return type;
-			}
-		}
-		return ContentType.MISC;
+		final String url = messageText.substring(entity.getOffset(), entity.getOffset() + entity.getLength());
+		return ContentType.determineContentType(url);
 	}
 	
 	public static AbstractRemoteContentHandler getHandler(final Message message, final MessageEntity entity) throws MalformedURLException {

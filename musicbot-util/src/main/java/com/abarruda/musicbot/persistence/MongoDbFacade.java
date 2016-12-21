@@ -5,6 +5,7 @@ import static java.util.Arrays.asList;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -19,6 +20,7 @@ import com.abarruda.musicbot.items.RemoteContent;
 import com.abarruda.musicbot.items.TermResponse;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -140,6 +142,22 @@ public class MongoDbFacade implements DatabaseFacade {
 			logger.warn("Error deleting expired user!");
 		}
 	}
+	
+	@Override
+	public Set<RemoteContent> getRemoteContent(final String chatId) {
+		final Set<RemoteContent> remoteContent = Sets.newHashSet();
+		
+		final MongoCursor<Document> cursor = getRemoteContentCollection(chatId).find().iterator();
+		while(cursor.hasNext()) {
+			final Document doc = cursor.next();
+			try {
+				remoteContent.add(RemoteContent.getRemoteContentFromDoc(doc));
+			} catch (final Exception e) {
+				logger.error("Could not parse content from doc '" + doc.toJson() + "'", e);
+			}
+		}
+		return remoteContent;
+	}
 
 	@Override
 	public RemoteContent getRemoteContent(final String chatId, final String url) {
@@ -218,6 +236,20 @@ public class MongoDbFacade implements DatabaseFacade {
 		getRemoteContentCollection(chatId).insertMany(remoteContentDocumentsToInsert);
 	}
 	
+	@Override
+	public void updateRemoteContentType(final String chatId, final String id, ContentType type) {
+		final BasicDBObject update = new BasicDBObject("$set", new BasicDBObject(RemoteContent.FIELD_TYPE, type.name()));
+		try {
+			final UpdateResult result = getRemoteContentCollection(chatId).updateOne(eq("_id", new ObjectId(id)), update);
+			if (result.getMatchedCount() != 1) {
+				logger.error("Update error!");
+			}
+		} catch (final Exception e) {
+			logger.error("Error encountered updating type!", e);
+		}
+	}
+	
+	@Override
 	public void updateSetStatus(final String chatId, final MusicSet set, final MusicSet.Status status) {
 		final BasicDBObject update = new BasicDBObject("$set", new BasicDBObject(MusicSet.FIELD_STATUS, status.name()));
 		try {
@@ -230,6 +262,7 @@ public class MongoDbFacade implements DatabaseFacade {
 		}
 	}
 	
+	@Override
 	public void updateSetMetadata(final String chatId, final MusicSet set, final MusicSet.Metadata metadata) {
 		final BasicDBObject update = new BasicDBObject("$set", new BasicDBObject(MusicSet.FIELD_METADATA, metadata.toDoc()));
 		final UpdateResult result = getRemoteContentCollection(chatId).updateOne(eq(MusicSet.FIELD_URL, set.url), update);

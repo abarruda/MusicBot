@@ -1,5 +1,6 @@
 package com.abarruda.musicbot.items;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
@@ -9,7 +10,8 @@ public enum ContentType {
 	
 	SOUNDCLOUD("soundcloud.com", "www.soundcloud.com"),
 	YOUTUBE("youtube.com", "www.youtube.com", "youtu.be"),
-	MISC("");
+	MISC(""),
+	MALFORMED;
 	
 	public List<String> hostNames;
 	
@@ -24,6 +26,22 @@ public enum ContentType {
 			}
 		}
 		return false;
+	}
+	
+	public static ContentType determineContentType(final String urlString) {
+		URL url;
+		try {
+			url = new URL(urlString);
+			for (ContentType type : ContentType.values()) {
+				if (type.isOfType(url)) {
+					return type;
+				}
+			}
+			return ContentType.MISC;
+		} catch (MalformedURLException e) {
+			return ContentType.MALFORMED;
+		}
+		
 	}
 	
 	public static boolean isMusicSet(final String type) {

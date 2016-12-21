@@ -2,7 +2,9 @@ package com.abarruda.musicbot.persistence;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import com.abarruda.musicbot.items.ContentType;
 import com.abarruda.musicbot.items.DetectedContent;
 import com.abarruda.musicbot.items.MusicSet;
 import com.abarruda.musicbot.items.RemoteContent;
@@ -22,6 +24,8 @@ public interface DatabaseFacade {
 	
 	public void userExpired(final String chatId, final String userId);
 	
+	public Set<RemoteContent> getRemoteContent(final String chatId);
+	
 	public RemoteContent getRemoteContent(final String chatId, final String url);
 	
 	public Map<MusicSet, String> getMusicSets();
@@ -29,6 +33,8 @@ public interface DatabaseFacade {
 	public long getRemoteContentCount(final String chatId);
 	
 	public void insertRemoteContent(final String chatId, final List<DetectedContent> sets);
+	
+	public void updateRemoteContentType(final String chatId, final String id, ContentType type);
 	
 	public void updateSetStatus(final String chatId, final MusicSet set, final MusicSet.Status status);
 	
