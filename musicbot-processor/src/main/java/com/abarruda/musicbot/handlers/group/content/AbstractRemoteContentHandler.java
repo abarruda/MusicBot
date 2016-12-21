@@ -1,4 +1,4 @@
-package com.abarruda.musicbot.handlers.group.sets;
+package com.abarruda.musicbot.handlers.group.content;
 
 import java.net.MalformedURLException;
 import java.net.URL;
