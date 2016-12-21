@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 
-public enum SetType {
+public enum ContentType {
 	
 	SOUNDCLOUD("soundcloud.com", "www.soundcloud.com"),
 	YOUTUBE("youtube.com", "www.youtube.com", "youtu.be"),
@@ -13,7 +13,7 @@ public enum SetType {
 	
 	public List<String> hostNames;
 	
-	SetType(String... hostnames) {
+	ContentType(String... hostnames) {
 		hostNames = Lists.newArrayList(hostnames);
 	}
 	

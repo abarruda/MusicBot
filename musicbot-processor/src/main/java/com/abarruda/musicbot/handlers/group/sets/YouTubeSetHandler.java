@@ -6,9 +6,9 @@ import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.MessageEntity;
 
 import com.abarruda.musicbot.items.DetectedContent;
-import com.abarruda.musicbot.items.SetType;
+import com.abarruda.musicbot.items.ContentType;
 
-public class YouTubeSetHandler extends AbstractSetHandler {
+public class YouTubeSetHandler extends AbstractRemoteContentHandler {
 	
 	private static final Logger logger = LogManager.getLogger(YouTubeSetHandler.class);
 
@@ -18,8 +18,8 @@ public class YouTubeSetHandler extends AbstractSetHandler {
 	}
 
 	@Override
-	public DetectedContent getSet() {
-		return new DetectedContent(SetType.YOUTUBE, 
+	public DetectedContent getContent() {
+		return new DetectedContent(ContentType.YOUTUBE, 
 				getUrl(this.message.getText(), entity), 
 				this.message.getDate(),
 				getFromUser(this.message));

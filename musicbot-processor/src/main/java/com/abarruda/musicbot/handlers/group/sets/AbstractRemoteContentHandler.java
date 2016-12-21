@@ -7,20 +7,20 @@ import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.MessageEntity;
 
 import com.abarruda.musicbot.items.DetectedContent;
-import com.abarruda.musicbot.items.SetType;
+import com.abarruda.musicbot.items.ContentType;
 import com.abarruda.musicbot.items.User;
 
-public abstract class AbstractSetHandler {
+public abstract class AbstractRemoteContentHandler {
 	
 	protected Message message;
 	protected MessageEntity entity; 
 	
-	protected AbstractSetHandler(final Message message, final MessageEntity entity) {
+	protected AbstractRemoteContentHandler(final Message message, final MessageEntity entity) {
 		this.message = message;
 		this.entity = entity;
 	}
 	
-	public abstract DetectedContent getSet();
+	public abstract DetectedContent getContent();
 	
 	protected static String getUrl(final String messageText, final MessageEntity entity) {
 		return messageText.substring(entity.getOffset(), entity.getOffset() + entity.getLength());
@@ -33,18 +33,18 @@ public abstract class AbstractSetHandler {
 				message.getFrom().getLastName());
 	}
 	
-	private static SetType determineSetType(final String messageText, final MessageEntity entity) throws MalformedURLException {
+	private static ContentType determineContentType(final String messageText, final MessageEntity entity) throws MalformedURLException {
 		final URL url = new URL(messageText.substring(entity.getOffset(), entity.getOffset() + entity.getLength()));
-		for (SetType type : SetType.values()) {
+		for (ContentType type : ContentType.values()) {
 			if (type.isOfType(url)) {
 				return type;
 			}
 		}
-		return SetType.MISC;
+		return ContentType.MISC;
 	}
 	
-	public static AbstractSetHandler getHandler(final Message message, final MessageEntity entity) throws MalformedURLException {
-		switch (determineSetType(message.getText(), entity)) {
+	public static AbstractRemoteContentHandler getHandler(final Message message, final MessageEntity entity) throws MalformedURLException {
+		switch (determineContentType(message.getText(), entity)) {
 		case SOUNDCLOUD: 
 			return new SoundCloudSetHandler(message, entity);
 		

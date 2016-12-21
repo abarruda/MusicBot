@@ -10,7 +10,7 @@ import org.apache.log4j.Logger;
 
 import com.abarruda.musicbot.api.sets.v1.resource.SetsResource;
 import com.abarruda.musicbot.items.MusicSet;
-import com.abarruda.musicbot.items.SetType;
+import com.abarruda.musicbot.items.ContentType;
 import com.abarruda.musicbot.persistence.DatabaseFacade;
 import com.abarruda.musicbot.persistence.MongoDbFacade;
 import com.google.common.base.Predicate;
@@ -25,7 +25,7 @@ public class SetsContainer extends SetsResource {
 	private static final Logger logger = LogManager.getLogger(SetsContainer.class);
 	
 	private static ImmutableSet<String> setUrls = ImmutableSet.copyOf(
-			Iterables.concat(SetType.SOUNDCLOUD.hostNames, SetType.YOUTUBE.hostNames));
+			Iterables.concat(ContentType.SOUNDCLOUD.hostNames, ContentType.YOUTUBE.hostNames));
 
 	private static final Predicate<MusicSet> setPredicate = new Predicate<MusicSet>() {
 		@Override

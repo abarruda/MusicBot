@@ -46,7 +46,7 @@ public class StatsHandler implements MessageHandler {
 							}
 							
 							responseString.append("\n*Music Sets:*\n");
-							responseString.append("# Sets: " + db.getSetCount(chatId));
+							responseString.append("# Sets: " + db.getRemoteContentCount(chatId));
 						}
 						
 						if (Strings.isNullOrEmpty(responseString.toString())) {

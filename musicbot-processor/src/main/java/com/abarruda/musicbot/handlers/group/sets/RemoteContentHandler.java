@@ -13,7 +13,7 @@ import com.abarruda.musicbot.persistence.DatabaseFacade;
 import com.abarruda.musicbot.persistence.MongoDbFacade;
 import com.abarruda.musicbot.handlers.MessageHandler;
 import com.abarruda.musicbot.items.DetectedContent;
-import com.abarruda.musicbot.items.MusicSet;
+import com.abarruda.musicbot.items.RemoteContent;
 import com.abarruda.musicbot.processor.responder.responses.BotResponse;
 import com.abarruda.musicbot.processor.responder.responses.TextResponse;
 import com.google.common.collect.Lists;
@@ -24,31 +24,31 @@ import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.List;
 
-public class SetHandler implements MessageHandler {
+public class RemoteContentHandler implements MessageHandler {
 	
-	private static final Logger logger = LogManager.getLogger(SetHandler.class);
+	private static final Logger logger = LogManager.getLogger(RemoteContentHandler.class);
 	
 	private static final String TYPE_URL = "url";
 	
 	private DatabaseFacade db;
 	
-	public SetHandler() {
+	public RemoteContentHandler() {
 		db = MongoDbFacade.getMongoDb();
 	}
 		
-	private static Set<DetectedContent> getSets(final Message message, final User user) {
+	private static Set<DetectedContent> getContent(final Message message, final User user) {
 		final Set<DetectedContent> sets = Sets.newHashSet();
 		if (message.getEntities() != null) {
 			for (final MessageEntity entity : message.getEntities()) {
 				if (entity.getType().equals(TYPE_URL)) {
 					try {
-						final AbstractSetHandler setHandler = AbstractSetHandler.getHandler(message, entity);
-						final DetectedContent setInMessage = setHandler.getSet();
-						sets.add(setInMessage);
+						final AbstractRemoteContentHandler contentHandler = AbstractRemoteContentHandler.getHandler(message, entity);
+						final DetectedContent contentInMessage = contentHandler.getContent();
+						sets.add(contentInMessage);
 						
-						logger.info("Detected '" + setInMessage.type.name() + "' by '" + setInMessage.user.firstName + "': " + setInMessage.url);
+						logger.info("Detected '" + contentInMessage.type.name() + "' by '" + contentInMessage.user.firstName + "': " + contentInMessage.url);
 					} catch (MalformedURLException e) {
-						logger.error("Could not handle detected set!", e);
+						logger.error("Could not handle detected content!", e);
 					}
 				}
 			}
@@ -64,32 +64,32 @@ public class SetHandler implements MessageHandler {
 			@Override
 			public BotResponse call() throws Exception {
 				
-				final Set<DetectedContent> sets = getSets(message, message.getFrom());
+				final Set<DetectedContent> remoteContents = getContent(message, message.getFrom());
 				
-				if (sets.size() > 0) {
-					final List<DetectedContent> setsToBeInserted = Lists.newArrayList();
+				if (remoteContents.size() > 0) {
+					final List<DetectedContent> remoteContentToBeInserted = Lists.newArrayList();
 					final List<String> messagesToSend = Lists.newArrayList();
 					
-					for(final DetectedContent set : sets) {
+					for(final DetectedContent set : remoteContents) {
 						try {
-							final MusicSet trackedSet = db.getSet(chatId, set.url);
+							final RemoteContent trackedRemoteContent = db.getRemoteContent(chatId, set.url);
 							
-							if (trackedSet == null) {
+							if (trackedRemoteContent == null) {
 								// insert
-								setsToBeInserted.add(set);
+								remoteContentToBeInserted.add(set);
 							} else {						
 								// Update the DB
-								db.updateSetReference(chatId, set);
+								db.updateRemoteContentReference(chatId, set);
 								
 								
 								// Send the message to the outgoing queue
-								final int referenceCount = trackedSet.references.size() + 1 + 1; // +1 for the original post, +1 for this post
+								final int referenceCount = trackedRemoteContent.references.size() + 1 + 1; // +1 for the original post, +1 for this post
 								final StringBuilder messageText = new StringBuilder();
-								messageText.append(trackedSet.url);
+								messageText.append(trackedRemoteContent.url);
 								messageText.append(" was originally posted by ");
-								messageText.append(trackedSet.originalUser.firstName);
+								messageText.append(trackedRemoteContent.originalUser.firstName);
 								messageText.append(" on ");
-								messageText.append(new Date(trackedSet.originalDate * 1000L));
+								messageText.append(new Date(trackedRemoteContent.originalDate * 1000L));
 								messageText.append(".  Referenced ");
 								messageText.append(referenceCount);
 								messageText.append(" time(s).");
@@ -100,8 +100,8 @@ public class SetHandler implements MessageHandler {
 						}
 					}
 					
-					if (setsToBeInserted.size() > 0) {
-						db.insertSets(chatId, setsToBeInserted);
+					if (remoteContentToBeInserted.size() > 0) {
+						db.insertRemoteContent(chatId, remoteContentToBeInserted);
 					}
 					
 					if (messagesToSend.size() > 0) {

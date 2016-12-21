@@ -14,6 +14,7 @@ import org.bson.types.ObjectId;
 import com.abarruda.musicbot.config.Config;
 import com.abarruda.musicbot.items.DetectedContent;
 import com.abarruda.musicbot.items.MusicSet;
+import com.abarruda.musicbot.items.RemoteContent;
 import com.abarruda.musicbot.items.TermResponse;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -140,18 +141,18 @@ public class MongoDbFacade implements DatabaseFacade {
 	}
 
 	@Override
-	public MusicSet getSet(final String chatId, final String url) {
+	public RemoteContent getRemoteContent(final String chatId, final String url) {
 		
 		final Document dbDoc = getRemoteContentCollection(chatId).find(eq(SET_URL_BSON, url)).first();
 		if (dbDoc == null) {
 			return null;
 		} else {
-			return MusicSet.getSetFromDoc(dbDoc);
+			return RemoteContent.getRemoteContentFromDoc(dbDoc);
 		}
 	}
 	
 	@Override
-	public Map<MusicSet, String> getSets() {
+	public Map<MusicSet, String> getMusicSets() {
 		final Map<MusicSet, String> allSets = Maps.newHashMap();
 		
 		for(final String chatId : getChatIds().keySet()) {
@@ -184,12 +185,12 @@ public class MongoDbFacade implements DatabaseFacade {
 	}
 	
 	@Override
-	public long getSetCount(String chatId) {
+	public long getRemoteContentCount(String chatId) {
 		return getRemoteContentCollection(chatId).count();
 	}
 
 	@Override
-	public void insertSets(String chatId, List<DetectedContent> sets) {
+	public void insertRemoteContent(String chatId, List<DetectedContent> sets) {
 		List<Document> setDocumentsToBeInserted = Lists.newArrayList();
 		for (final DetectedContent set : sets) {
 			try {
@@ -232,7 +233,7 @@ public class MongoDbFacade implements DatabaseFacade {
 	}
 
 	@Override
-	public void updateSetReference(String chatId, DetectedContent set) {
+	public void updateRemoteContentReference(String chatId, DetectedContent set) {
 		try {
 			final Document user = new Document().append("userId", set.user.userId)
 					.append("firstName", set.user.firstName)

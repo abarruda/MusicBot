@@ -6,9 +6,9 @@ import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.MessageEntity;
 
 import com.abarruda.musicbot.items.DetectedContent;
-import com.abarruda.musicbot.items.SetType;
+import com.abarruda.musicbot.items.ContentType;
 
-public class SoundCloudSetHandler extends AbstractSetHandler {
+public class SoundCloudSetHandler extends AbstractRemoteContentHandler {
 	
 	private static final Logger logger = LogManager.getLogger(SoundCloudSetHandler.class);
 
@@ -27,8 +27,8 @@ public class SoundCloudSetHandler extends AbstractSetHandler {
 	}
 
 	@Override
-	public DetectedContent getSet() {
-		return new DetectedContent(SetType.SOUNDCLOUD, 
+	public DetectedContent getContent() {
+		return new DetectedContent(ContentType.SOUNDCLOUD, 
 				getUrl(this.message.getText(), entity), 
 				this.message.getDate(),
 				getFromUser(this.message));

@@ -120,7 +120,7 @@ public class MetadataScraper implements Runnable {
 	
 	public void run() {
 		try {
-			final Map<MusicSet, String> allSets = db.getSets();
+			final Map<MusicSet, String> allSets = db.getMusicSets();
 			for (Entry<MusicSet, String> entry : allSets.entrySet()) {
 				executor.submit(
 						new MetadataScraperWorker(this.allSets, entry.getValue(), entry.getKey(),  delaySeconds));
