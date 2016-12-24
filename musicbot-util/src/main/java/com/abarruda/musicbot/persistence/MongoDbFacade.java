@@ -40,6 +40,8 @@ public class MongoDbFacade implements DatabaseFacade {
 	private static final String CHAT_ID_BSON = "chatId";
 	private static final String CHAT_NAME_BSON = "chatName";
 	private static final String USER_ID_BSON = "userId";
+	private static final String USER_FIRST_NAME_BSON = "firstName";
+	private static final String USER_LAST_NAME_BSON = "lastName";
 	private static final String LAST_SEEN_BSON = "lastSeen";
 	private static final String SET_URL_BSON = "url";
 	
@@ -112,8 +114,11 @@ public class MongoDbFacade implements DatabaseFacade {
 	}
 	
 	@Override
-	public void updateLastSeen(String chatId, String userId, String dateString) {
-		final BasicDBObject update = new BasicDBObject("$set", new BasicDBObject(LAST_SEEN_BSON, dateString));
+	public void updateLastSeen(final String chatId, final String userId, final String firstName, final String lastName, String dateString) {
+		final BasicDBObject update = new BasicDBObject("$set", 
+				new BasicDBObject(LAST_SEEN_BSON, dateString)
+					.append(USER_FIRST_NAME_BSON, firstName)
+					.append(USER_LAST_NAME_BSON, lastName));
 		final UpdateResult result = getChatMemberCollection(chatId).updateOne(
 				eq(USER_ID_BSON, userId), 
 				update, 

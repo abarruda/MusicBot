@@ -18,7 +18,7 @@ public interface DatabaseFacade {
 	
 	public boolean deleteChatId(final String chatId);
 	
-	public void updateLastSeen(final String chatId, final String userId, final String dateString);
+	public void updateLastSeen(final String chatId, final String userId, final String firstName, final String lastName, final String dateString);
 	
 	public String getUserLastSeenFromChat(final String chatId, final String userId);
 	

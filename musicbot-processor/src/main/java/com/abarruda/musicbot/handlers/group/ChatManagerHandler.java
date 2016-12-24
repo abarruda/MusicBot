@@ -5,6 +5,7 @@ import java.util.concurrent.Callable;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.telegram.telegrambots.api.objects.Message;
+import org.telegram.telegrambots.api.objects.User;
 
 import com.abarruda.musicbot.ChatManager;
 import com.abarruda.musicbot.handlers.MessageHandler;
@@ -26,11 +27,14 @@ public class ChatManagerHandler implements MessageHandler {
 
 			@Override
 			public BotResponse call() throws Exception {
+				final User user = message.getFrom();
 				try {
 					chatManager.update(
 							message.getChatId().toString(),
 							message.getChat().getTitle(), 
-							message.getFrom().getId().toString(),
+							user.getId().toString(),
+							user.getFirstName(),
+							user.getLastName(),
 							message.getDate().toString());
 				} catch (Exception e) {
 					logger.error("Error updating ChatManager!", e);

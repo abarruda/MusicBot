@@ -81,7 +81,7 @@ public class ChatManager {
 		return chatManager;
 	}
 	
-	public void update(final String chatId, final String chatName, final String userId, final String dateString) {
+	public void update(final String chatId, final String chatName, final String userId, final String userFirstName, final String userLastName, final String dateString) {
 		chatIdToChatNameMapping.put(chatId, chatName);
 		db.storeChat(chatId, chatName);
 		
@@ -91,7 +91,7 @@ public class ChatManager {
 		}
 		
 		cacheMap.get(chatId).put(userId, dateString);
-		db.updateLastSeen(chatId, userId, dateString);
+		db.updateLastSeen(chatId, userId, userFirstName, userLastName, dateString);
 	}
 	
 	/**
