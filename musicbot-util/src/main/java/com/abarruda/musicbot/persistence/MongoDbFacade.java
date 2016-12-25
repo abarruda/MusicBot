@@ -18,6 +18,7 @@ import com.abarruda.musicbot.items.DetectedContent;
 import com.abarruda.musicbot.items.MusicSet;
 import com.abarruda.musicbot.items.RemoteContent;
 import com.abarruda.musicbot.items.TermResponse;
+import com.abarruda.musicbot.items.User;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -114,7 +115,7 @@ public class MongoDbFacade implements DatabaseFacade {
 	}
 	
 	@Override
-	public void updateLastSeen(final String chatId, final String userId, final String firstName, final String lastName, String dateString) {
+	public void updateLastSeen(final String chatId, final Integer userId, final String firstName, final String lastName, String dateString) {
 		final BasicDBObject update = new BasicDBObject("$set", 
 				new BasicDBObject(LAST_SEEN_BSON, dateString)
 					.append(USER_FIRST_NAME_BSON, firstName)
@@ -128,9 +129,23 @@ public class MongoDbFacade implements DatabaseFacade {
 			logger.error("Error updating last seen.");
 		}
 	}
+	
+	@Override
+	public Set<User> getUsersForChat(final String chatId) {
+		final Set<User> users = Sets.newHashSet();
+		try {
+			final MongoCursor<Document> cursor = getChatMemberCollection(chatId).find().iterator();
+			while(cursor.hasNext()) {
+				users.add(User.getUserFromDocument(cursor.next()));
+			}
+		} catch (final Exception e) {
+			logger.error("Can't get users!", e);
+		}
+		return users;
+	}
 
 	@Override
-	public String getUserLastSeenFromChat(String chatId, String userId) {
+	public String getUserLastSeenFromChat(String chatId, int userId) {
 		final MongoCollection<Document> collection = getChatMemberCollection(chatId);
 		final Document lastSeen = collection.find(eq(USER_ID_BSON, userId)).first();
 		if (lastSeen != null) {

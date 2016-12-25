@@ -54,7 +54,7 @@ public class ChatManager {
 
 							@Override
 							public String load(String key) throws Exception {
-								final String lastSeen = db.getUserLastSeenFromChat(chatId, key);
+								final String lastSeen = db.getUserLastSeenFromChat(chatId, Integer.valueOf(key));
 								if (lastSeen == null) {
 									throw new UserLastSeenNotFoundException();
 								}
@@ -81,7 +81,7 @@ public class ChatManager {
 		return chatManager;
 	}
 	
-	public void update(final String chatId, final String chatName, final String userId, final String userFirstName, final String userLastName, final String dateString) {
+	public void update(final String chatId, final String chatName, final Integer userId, final String firstName, final String lastName, final String dateString) {
 		chatIdToChatNameMapping.put(chatId, chatName);
 		db.storeChat(chatId, chatName);
 		
@@ -90,15 +90,15 @@ public class ChatManager {
 			cacheMap.put(chatId, newCache);
 		}
 		
-		cacheMap.get(chatId).put(userId, dateString);
-		db.updateLastSeen(chatId, userId, userFirstName, userLastName, dateString);
+		cacheMap.get(chatId).put(userId.toString(), dateString);
+		db.updateLastSeen(chatId, userId, firstName, lastName, dateString);
 	}
 	
 	/**
 	 * Returns the chats (chatName=>chatId) the user has been last seen in within a specific range
 	 * 
 	 */
-	public Map<String, String> getChatsForUserFromCache(String userId) {
+	public Map<String, String> getChatsForUserFromCache(Integer userId) {
 		
 		final Map<String, String> chatsForUser = Maps.newHashMap();
 		
@@ -107,7 +107,7 @@ public class ChatManager {
 			
 			String userLastSeen;
 			try {
-				userLastSeen = cache.get(userId);//cache.getIfPresent(userId);
+				userLastSeen = cache.get(userId.toString());//cache.getIfPresent(userId);
 			} catch (ExecutionException e) {
 				userLastSeen = null;
 			}

@@ -32,7 +32,7 @@ public class ChatManagerHandler implements MessageHandler {
 					chatManager.update(
 							message.getChatId().toString(),
 							message.getChat().getTitle(), 
-							user.getId().toString(),
+							user.getId(),
 							user.getFirstName(),
 							user.getLastName(),
 							message.getDate().toString());

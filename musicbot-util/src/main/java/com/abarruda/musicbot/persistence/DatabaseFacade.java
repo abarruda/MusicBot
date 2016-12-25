@@ -9,6 +9,7 @@ import com.abarruda.musicbot.items.DetectedContent;
 import com.abarruda.musicbot.items.MusicSet;
 import com.abarruda.musicbot.items.RemoteContent;
 import com.abarruda.musicbot.items.TermResponse;
+import com.abarruda.musicbot.items.User;
 
 public interface DatabaseFacade {
 	
@@ -18,9 +19,11 @@ public interface DatabaseFacade {
 	
 	public boolean deleteChatId(final String chatId);
 	
-	public void updateLastSeen(final String chatId, final String userId, final String firstName, final String lastName, final String dateString);
+	public void updateLastSeen(final String chatId, final Integer userId, final String firstName, final String lastName, final String dateString);
 	
-	public String getUserLastSeenFromChat(final String chatId, final String userId);
+	public Set<User> getUsersForChat(final String chatId);
+	
+	public String getUserLastSeenFromChat(final String chatId, final int userId);
 	
 	public void userExpired(final String chatId, final String userId);
 	
