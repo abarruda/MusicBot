@@ -156,7 +156,7 @@ public class MongoDbFacade implements DatabaseFacade {
 	}
 
 	@Override
-	public void userExpired(String chatId, String userId) {
+	public void userExpired(String chatId, int userId) {
 		DeleteResult result = getChatMemberCollection(chatId).deleteOne(eq(USER_ID_BSON, userId));
 		if (result.getDeletedCount() != 1) {
 			logger.warn("Error deleting expired user!");

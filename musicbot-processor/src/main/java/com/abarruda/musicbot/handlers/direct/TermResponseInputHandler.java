@@ -34,7 +34,7 @@ public class TermResponseInputHandler implements MessageHandler, CallbackQueryHa
 	
 	private DatabaseFacade db;
 	private ChatManager chatManger;
-	private Cache<String, AutoResponderInputState> cache;
+	private Cache<Integer, AutoResponderInputState> cache;
 	
 	private static class AutoResponderInputState {
 		
@@ -98,7 +98,7 @@ public class TermResponseInputHandler implements MessageHandler, CallbackQueryHa
 
 			@Override
 			public BotResponse call() throws Exception {
-				final String userId = query.getFrom().getId().toString();
+				final int userId = query.getFrom().getId();
 				final String directChatId = query.getMessage().getChatId().toString();
 				final String chatIdFromButton = query.getData();
 				
@@ -110,7 +110,7 @@ public class TermResponseInputHandler implements MessageHandler, CallbackQueryHa
 				
 				// check if they already have made their allotment
 				for (final TermResponse tr : db.getTermResponses(chatIdForAutoResponder)) {
-					if (tr.userId.equals(userId)) {
+					if (tr.userId == userId) {
 						return TextResponse.createResponse(
 								directChatId, 
 								"Sorry, you have already made a submission, now fuck off and wait a week!", 
@@ -120,7 +120,7 @@ public class TermResponseInputHandler implements MessageHandler, CallbackQueryHa
 				}
 				
 				final AutoResponderInputState state = new AutoResponderInputState();
-				state.chatId = directChatId;
+				state.chatId = chatIdForAutoResponder;
 				cache.put(userId, state);
 				
 				return ForceReplyTextResponse.createResponse(
@@ -141,7 +141,7 @@ public class TermResponseInputHandler implements MessageHandler, CallbackQueryHa
 			public BotResponse call() throws Exception {
 				
 				if (message.hasText()) {
-					final String userId = message.getFrom().getId().toString();
+					final int userId = message.getFrom().getId();
 					final String chatId = message.getChatId().toString();
 					
 					if (message.getText().equals(COMMAND)) {

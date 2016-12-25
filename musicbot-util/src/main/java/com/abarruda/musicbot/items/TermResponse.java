@@ -6,12 +6,12 @@ import org.bson.Document;
 
 public class TermResponse {
 	public String _id;
-	public String userId;
+	public int userId;
 	public Date date;
 	public String term;
 	public String response;
 	
-	public TermResponse(String userId, Date date, String term, String response) {
+	public TermResponse(int userId, Date date, String term, String response) {
 		this.userId = userId;
 		this.date = date;
 		this.term = term;
@@ -20,7 +20,7 @@ public class TermResponse {
 	
 	public static TermResponse getTermResponseFromDoc(Document doc) {
 		TermResponse termResponse = new TermResponse(
-				doc.getString("userId"), 
+				doc.getInteger("userId"), 
 				doc.getDate("date"),
 				doc.getString("term"),
 				doc.getString("response"));

@@ -36,7 +36,7 @@ public class ChatManager {
 		final RemovalListener<String, String> listener = new RemovalListener<String, String>() {
 			@Override
 			public void onRemoval(RemovalNotification<String, String> notification) {
-				db.userExpired(chatId, notification.getKey());
+				db.userExpired(chatId, Integer.valueOf(notification.getKey()));
 			}
 		};
 		return listener;

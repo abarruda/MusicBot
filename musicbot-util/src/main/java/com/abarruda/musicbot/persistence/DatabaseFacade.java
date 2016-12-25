@@ -25,7 +25,7 @@ public interface DatabaseFacade {
 	
 	public String getUserLastSeenFromChat(final String chatId, final int userId);
 	
-	public void userExpired(final String chatId, final String userId);
+	public void userExpired(final String chatId, final int userId);
 	
 	public Set<RemoteContent> getRemoteContent(final String chatId);
 	
