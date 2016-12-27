@@ -63,20 +63,24 @@ public class SetsContainer extends SetsResource {
 		}
 	};
 	
+	private static Predicate<MusicSet> getUserSetPredicate(final String userId) {
+		return new Predicate<MusicSet>() {
+			@Override
+			public boolean apply(MusicSet input) {
+				return String.valueOf(input.originalUser.userId).equals(userId);
+			}
+		};
+	}
+	
 	@Override
-	public Iterable<MusicSet> getSetsByChatId(final String id, final String userId, final boolean orderByReferenceCount) {
+	public Iterable<MusicSet> getPopularSetsByChatId(final String id, final String userId) {
 		
 		final List<Predicate<MusicSet>> listOfPredicates = new ArrayList<Predicate<MusicSet>>();
 		listOfPredicates.add(setPredicate);
 		listOfPredicates.add(activeSetPredicate);
 		
 		if (userId != null) {
-			listOfPredicates.add(new Predicate<MusicSet>() {
-				@Override
-				public boolean apply(MusicSet input) {
-					return String.valueOf(input.originalUser.userId).equals(userId);
-				}
-			});
+			listOfPredicates.add(getUserSetPredicate(userId));
 		}
 		
 		final DatabaseFacade db = MongoDbFacade.getMongoDb();
@@ -86,15 +90,13 @@ public class SetsContainer extends SetsResource {
 				Iterables.filter(musicSets, 
 						Predicates.and(listOfPredicates)));
 		
-		if (orderByReferenceCount) {
 			Collections.sort(filteredMusicSets, Ordering.from(orderByReferences).reversed()); 
-		}
 		
 		return filteredMusicSets;
 	}
 	
 	@Override
-	public Iterable<MusicSet> getRecentSetsByChatId(final String id, final String durationString) {
+	public Iterable<MusicSet> getRecentSetsByChatId(final String id, final String durationDaysString, final String user) {
 		final List<Predicate<MusicSet>> listOfPredicates = new ArrayList<Predicate<MusicSet>>();
 		listOfPredicates.add(activeSetPredicate);
 		
@@ -103,9 +105,13 @@ public class SetsContainer extends SetsResource {
 			public boolean apply(MusicSet input) {
 				final Date originalDate = new Date(input.originalDate * 1000L);
 				long timeSinceFirstSeen = new Date().getTime() - originalDate.getTime();
-				return timeSinceFirstSeen <= Duration.ofDays(7).toMillis();
+				return timeSinceFirstSeen <= Duration.parse(durationDaysString).toMillis();
 			}
 		});
+		
+		if (user != null) {
+			listOfPredicates.add(getUserSetPredicate(user));
+		}
 		
 		final DatabaseFacade db = MongoDbFacade.getMongoDb();
 		final List<MusicSet> musicSets = db.getMusicSets(id);

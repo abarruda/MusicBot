@@ -20,18 +20,14 @@ public abstract class SetsResource {
 	@ApiOperation(value = "Get sets", notes = "Get Sets")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id}")
-    public abstract Iterable<MusicSet> getSetsByChatId(
+    @Path("/{id}/popular")
+    public abstract Iterable<MusicSet> getPopularSetsByChatId(
     		@PathParam(value = "id")
     		final String id, 
     		
     		@ApiParam(value = "User ID to filter by", required = false)
     		@QueryParam(value = "userId")
-    		final String user,
-    		
-    		@ApiParam(value = "", required = false)
-    		@QueryParam(value = "orderByReferenceCount")
-    		final boolean orderByReferenceCount);
+    		final String user);
 	
 	@ApiOperation(value = "Get recent music content")
 	@GET
@@ -41,9 +37,13 @@ public abstract class SetsResource {
 			@PathParam(value = "id")
 			final String id,
 			
-			@ApiParam(value = "Duration to retrieve music content up to.", required = true)
+			@ApiParam(value = "Duration (in days) to retrieve music content up to (ISO 8601).", required = true)
 			@QueryParam(value = "duration")
-			final String durationString);
+			final String durationString,
+			
+			@ApiParam(value = "User to filter by", required = false)
+			@QueryParam(value="user")
+			final String user);
 
 
 }
