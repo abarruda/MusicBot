@@ -32,6 +32,18 @@ public abstract class SetsResource {
     		@ApiParam(value = "", required = false)
     		@QueryParam(value = "orderByReferenceCount")
     		final boolean orderByReferenceCount);
+	
+	@ApiOperation(value = "Get recent music content")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/{id}/recent")
+	public abstract Iterable<MusicSet> getRecentSetsByChatId(
+			@PathParam(value = "id")
+			final String id,
+			
+			@ApiParam(value = "Duration to retrieve music content up to.", required = true)
+			@QueryParam(value = "duration")
+			final String durationString);
 
 
 }

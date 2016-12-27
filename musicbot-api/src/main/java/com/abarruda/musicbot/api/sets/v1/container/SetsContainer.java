@@ -1,8 +1,10 @@
 package com.abarruda.musicbot.api.sets.v1.container;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.log4j.LogManager;
@@ -38,18 +40,35 @@ public class SetsContainer extends SetsResource {
 		}
 	};
 	
-	private static final Comparator<MusicSet> setOrdering = new Comparator<MusicSet>() {
+	private static final Predicate<MusicSet> activeSetPredicate = new Predicate<MusicSet>() {
+
+		@Override
+		public boolean apply(MusicSet input) {
+			return input.status.equals(MusicSet.Status.ACTIVE.name());
+		}
+	};
+	
+	private static final Comparator<MusicSet> orderByReferences = new Comparator<MusicSet>() {
 		@Override
 		public int compare(MusicSet left, MusicSet right) {
 			return Ints.compare(left.references.size(), right.references.size());
 		}
-	}; 
+	};
+	
+	private static final Comparator<MusicSet> orderByMostRecent = new Comparator<MusicSet>() {
+
+		@Override
+		public int compare(MusicSet left, MusicSet right) {
+			return Ints.compare(left.originalDate, right.originalDate);
+		}
+	};
 	
 	@Override
 	public Iterable<MusicSet> getSetsByChatId(final String id, final String userId, final boolean orderByReferenceCount) {
 		
 		final List<Predicate<MusicSet>> listOfPredicates = new ArrayList<Predicate<MusicSet>>();
 		listOfPredicates.add(setPredicate);
+		listOfPredicates.add(activeSetPredicate);
 		
 		if (userId != null) {
 			listOfPredicates.add(new Predicate<MusicSet>() {
@@ -68,10 +87,36 @@ public class SetsContainer extends SetsResource {
 						Predicates.and(listOfPredicates)));
 		
 		if (orderByReferenceCount) {
-			Collections.sort(filteredMusicSets, Ordering.from(setOrdering).reversed()); 
+			Collections.sort(filteredMusicSets, Ordering.from(orderByReferences).reversed()); 
 		}
 		
 		return filteredMusicSets;
+	}
+	
+	@Override
+	public Iterable<MusicSet> getRecentSetsByChatId(final String id, final String durationString) {
+		final List<Predicate<MusicSet>> listOfPredicates = new ArrayList<Predicate<MusicSet>>();
+		listOfPredicates.add(activeSetPredicate);
+		
+		listOfPredicates.add(new Predicate<MusicSet>() {
+			@Override
+			public boolean apply(MusicSet input) {
+				final Date originalDate = new Date(input.originalDate * 1000L);
+				long timeSinceFirstSeen = new Date().getTime() - originalDate.getTime();
+				return timeSinceFirstSeen <= Duration.ofDays(7).toMillis();
+			}
+		});
+		
+		final DatabaseFacade db = MongoDbFacade.getMongoDb();
+		final List<MusicSet> musicSets = db.getMusicSets(id);
+		
+		final List<MusicSet> filteredMusicSets = Lists.newLinkedList(
+				Iterables.filter(musicSets, 
+						Predicates.and(listOfPredicates)));
+		
+		Collections.sort(filteredMusicSets, Ordering.from(orderByMostRecent));
+		return filteredMusicSets;
+		
 	}
 	
 }
