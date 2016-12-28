@@ -2,13 +2,14 @@ import React, { Component } from 'react';
 import './App.css';
 
 import URI from 'urijs';
+import moment from 'moment';
 import $ from 'jquery';
 import {Alert} from 'react-bootstrap';
 import {Carousel} from 'react-bootstrap';
 import {Grid, Row} from 'react-bootstrap';
 import {Nav, Navbar, NavDropdown, MenuItem} from 'react-bootstrap';
+import {Image} from 'react-bootstrap';
 import ReactSwipe from 'react-swipe';
-import MusicContentItem from './MusicContentItem';
 import './config/globalConfigs';
 
 let apiUrl = "";
@@ -76,7 +77,7 @@ class App extends Component {
     url += 'duration=' + duration;
 
     if (userId != null) {
-      url += '&user=' + userId;
+      url += '&userId=' + userId;
     }
 
     this.loadMusic(url);
@@ -87,7 +88,7 @@ class App extends Component {
     let url = apiUrl + 'sets/v1/' + chatId + '/' + type
 
     if (userId != null) {
-      url += '?user=' + userId;
+      url += '?userId=' + userId;
     }
 
     this.loadMusic(url);
@@ -115,7 +116,17 @@ class App extends Component {
 
   renderSwipeItems() {
     var items = this.state.music.map(function(set) {
-      return (<MusicContentItem key={set.url} data={set} />);
+      var date = moment(set.originalDate * 1000).format('MMMM Do YYYY, h:mm a');
+
+      return (
+        <div key={set.url}>
+          <a href={set.url}><Image src={set.metadata.imageUrl} responsive /></a>
+          <h4>{set.metadata.title}</h4>
+            Originally posted by {set.originalUser.firstName} on {date}
+            <br />
+            {set.references.length} reference(s).
+        </div>
+      );
     });
     return items;
   }

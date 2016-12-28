@@ -42,7 +42,7 @@ public abstract class SetsResource {
 			final String durationString,
 			
 			@ApiParam(value = "User to filter by", required = false)
-			@QueryParam(value="user")
+			@QueryParam(value="userId")
 			final String user);
 
 
