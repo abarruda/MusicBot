@@ -27,6 +27,7 @@ class App extends Component {
       activeSortKey: 'recent_all',
       chatId: 0,
       music: [],
+      loadedMusic: false,
       carouselIndex: 0,
       carouselDirection: null,
       users: []
@@ -62,7 +63,7 @@ class App extends Component {
       url: url,
       cache: false,
       success: function(data) {
-        this.setState({music: data});
+        this.setState({music: data, loadedMusic: true});
       }.bind(this),
       error: function(jqxhr, status, errorThrown) {
         console.log("error!");
@@ -169,7 +170,7 @@ class App extends Component {
     if (user === "all") {
       user = null;
     }
-    debugger;
+
     if (type === "recent") {
       this.loadRecentMusicSets(this.state.chatId, "P7D", user);
     } else if (type === "popular") {
@@ -181,8 +182,6 @@ class App extends Component {
     this.setState({activeSortKey: eventKey});
   }
 
-
-
   render() {
 
     if (typeof this.state.chatId === 'undefined') {
@@ -193,14 +192,14 @@ class App extends Component {
         </Alert>
         );
     } else {
-      var swipeItems = [<div></div>];
-      
-      if (this.state.music.length > 0) {
-        swipeItems = this.renderSwipeItems();
-      }
+      var swipeItems = this.renderSwipeItems();
 
       if (swipeItems.length === 0) {
-        swipeItems.push(this.renderAlertItem("warning", "Nothing found", "Try sorting another way."));
+        if (this.state.loadedMusic) {
+          swipeItems.push(this.renderAlertItem("warning", "Nothing found", "Try sorting another way."));  
+        } else {
+          swipeItems.push(<div key="loading">Loading...</div>);
+        }
       }
 
       return (
