@@ -85,7 +85,18 @@ class App extends Component {
 
   loadPopularMusicSets(chatId, userId) {
     let type = 'popular';
-    let url = apiUrl + 'sets/v1/' + chatId + '/' + type
+    let url = apiUrl + 'sets/v1/' + chatId + '/' + type;
+
+    if (userId != null) {
+      url += '?userId=' + userId;
+    }
+
+    this.loadMusic(url);
+  }
+
+  loadBrowsingMusicSets(chatId, userId) {
+    let type = 'browse';
+    let url = apiUrl + 'sets/v1/' + chatId + '/' + type;
 
     if (userId != null) {
       url += '?userId=' + userId;
@@ -100,6 +111,7 @@ class App extends Component {
 
   renderCarouselItems() {
     var items = this.state.music.map(function(set) {
+
       return (
         <Carousel.Item key={set.url}>
           <a href={set.url}><Image src={set.metadata.imageUrl} responsive /></a>
@@ -109,8 +121,8 @@ class App extends Component {
           </Carousel.Caption>
         </Carousel.Item>
         );
-
     });
+
     return items;
   }
 
@@ -131,6 +143,17 @@ class App extends Component {
     return items;
   }
 
+  renderAlertItem(bsStyle, title, description) {
+    return (
+      <div key={title}>
+        <Alert bsStyle={bsStyle}>
+          <h4>{title}</h4>
+          <p>{description}</p>
+        </Alert>
+      </div>
+      );
+  }
+
   renderUsers(source) {
     return this.state.users.map(function(user) {
       return (
@@ -146,21 +169,23 @@ class App extends Component {
     if (user === "all") {
       user = null;
     }
-
+    debugger;
     if (type === "recent") {
       this.loadRecentMusicSets(this.state.chatId, "P7D", user);
-    } else {
+    } else if (type === "popular") {
       this.loadPopularMusicSets(this.state.chatId, user);
+    } else {
+      this.loadBrowsingMusicSets(this.state.chatId, user);
     }
 
     this.setState({activeSortKey: eventKey});
   }
 
+
+
   render() {
 
-    var swipeItems = this.renderSwipeItems();
-
-    if (this.state.chatId === 0) {
+    if (typeof this.state.chatId === 'undefined') {
       return (
         <Alert bsStyle="danger">
           <h4>No Data Found!</h4>
@@ -168,6 +193,15 @@ class App extends Component {
         </Alert>
         );
     } else {
+      var swipeItems = [<div></div>];
+      
+      if (this.state.music.length > 0) {
+        swipeItems = this.renderSwipeItems();
+      }
+
+      if (swipeItems.length === 0) {
+        swipeItems.push(this.renderAlertItem("warning", "Nothing found", "Try sorting another way."));
+      }
 
       return (
         <div className="App">
@@ -182,17 +216,23 @@ class App extends Component {
 
               <Navbar.Collapse>
                 <Nav pullRight activeKey={this.state.activeSortKey} onSelect={this.handleSortSelect}>
-                  <NavDropdown id="sortByDropdown" title="Recent" >
+                  <NavDropdown id="sortByRecentDropdown" title="Recent" >
                     <MenuItem eventKey="recent_all">All</MenuItem>
                     <MenuItem divider/>
                     <MenuItem header>By Person</MenuItem>
                     {this.renderUsers("recent")}
                   </NavDropdown>
-                  <NavDropdown id="sortByDropdown" title="Popular" >
+                  <NavDropdown id="sortByPopularDropdown" title="Popular" >
                     <MenuItem eventKey="popular_all">All</MenuItem>
                     <MenuItem divider/>
                     <MenuItem header>By Person</MenuItem>
                     {this.renderUsers("popular")}
+                  </NavDropdown>
+                  <NavDropdown id="browseDropdown" title="Browse">
+                    <MenuItem eventKey="browse_all">All</MenuItem>
+                    <MenuItem divider/>
+                    <MenuItem header>By Person</MenuItem>
+                    {this.renderUsers("browse")}
                   </NavDropdown>
                 </Nav>
               </Navbar.Collapse>

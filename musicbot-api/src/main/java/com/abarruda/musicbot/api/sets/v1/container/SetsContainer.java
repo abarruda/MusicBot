@@ -48,6 +48,13 @@ public class SetsContainer extends SetsResource {
 		}
 	};
 	
+	private static final Predicate<MusicSet> popularSetPredicate = new Predicate<MusicSet>() {
+		@Override
+		public boolean apply(MusicSet input) {
+			return input.references.size() > 2;
+		}
+	};
+	
 	private static final Comparator<MusicSet> orderByReferences = new Comparator<MusicSet>() {
 		@Override
 		public int compare(MusicSet left, MusicSet right) {
@@ -72,12 +79,14 @@ public class SetsContainer extends SetsResource {
 		};
 	}
 	
+	
 	@Override
 	public Iterable<MusicSet> getPopularSetsByChatId(final String id, final String userId) {
 		
 		final List<Predicate<MusicSet>> listOfPredicates = new ArrayList<Predicate<MusicSet>>();
 		listOfPredicates.add(setPredicate);
 		listOfPredicates.add(activeSetPredicate);
+		listOfPredicates.add(popularSetPredicate);
 		
 		if (userId != null) {
 			listOfPredicates.add(getUserSetPredicate(userId));
@@ -90,7 +99,7 @@ public class SetsContainer extends SetsResource {
 				Iterables.filter(musicSets, 
 						Predicates.and(listOfPredicates)));
 		
-			Collections.sort(filteredMusicSets, Ordering.from(orderByReferences).reversed()); 
+		Collections.sort(filteredMusicSets, Ordering.from(orderByReferences).reversed()); 
 		
 		return filteredMusicSets;
 	}
@@ -122,7 +131,24 @@ public class SetsContainer extends SetsResource {
 		
 		Collections.sort(filteredMusicSets, Ordering.from(orderByMostRecent));
 		return filteredMusicSets;
+	}
+	
+	@Override public Iterable<MusicSet> getBrowsingSetsByChatId(final String chatId, final String userId) {
+		final List<Predicate<MusicSet>> listOfPredicates = new ArrayList<Predicate<MusicSet>>();
+		listOfPredicates.add(setPredicate);
+		listOfPredicates.add(activeSetPredicate);
 		
+		if (userId != null) {
+			listOfPredicates.add(getUserSetPredicate(userId));
+		}
+		
+		final DatabaseFacade db = MongoDbFacade.getMongoDb();
+		final List<MusicSet> musicSets = db.getMusicSets(chatId);
+		
+		final List<MusicSet> filteredMusicSets = Lists.newLinkedList(
+				Iterables.filter(musicSets, 
+						Predicates.and(listOfPredicates)));
+		return filteredMusicSets;
 	}
 	
 }
