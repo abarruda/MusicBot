@@ -3,6 +3,7 @@ import './App.css';
 
 import URI from 'urijs';
 import $ from 'jquery';
+import {Alert} from 'react-bootstrap';
 import {Carousel} from 'react-bootstrap';
 import {Grid, Row} from 'react-bootstrap';
 import {Nav, Navbar, NavDropdown, MenuItem} from 'react-bootstrap';
@@ -34,20 +35,17 @@ class App extends Component {
     this.handleSortSelect = this.handleSortSelect.bind(this);
   };
 
-  getParams() {
-  }
-
   componentDidMount() {
     let chatId = new URI().search(true).chatId;
-
-    this.loadUsers();
+    
+    this.loadUsers(chatId);
     this.loadRecentMusicSets(chatId, 'P7D', null);
     this.setState({chatId: chatId});
   }
 
-  loadUsers() {
+  loadUsers(chatId) {
     $.ajax({
-      url: apiUrl + 'users/v1/' + this.state.chatId,
+      url: apiUrl + 'users/v1/' + chatId,
       cache: false,
       success: function(data) {
         this.setState({users: data});
@@ -151,47 +149,55 @@ class App extends Component {
 
     var swipeItems = this.renderSwipeItems();
 
-    return (
-      <div className="App">
-      <Grid>
-        <Row>
-          <Navbar inverse collapseOnSelect>
+    if (this.state.chatId === 0) {
+      return (
+        <Alert bsStyle="danger">
+          <h4>No Data Found!</h4>
+          <p>Double check the url!</p>
+        </Alert>
+        );
+    } else {
 
-            <Navbar.Header>
-              <Navbar.Brand>ROOM 2</Navbar.Brand>
-              <Navbar.Toggle />
-            </Navbar.Header>
+      return (
+        <div className="App">
+        <Grid>
+          <Row>
+            <Navbar inverse collapseOnSelect>
 
-            <Navbar.Collapse>
-              <Nav pullRight activeKey={this.state.activeSortKey} onSelect={this.handleSortSelect}>
-                <NavDropdown id="sortByDropdown" title="Recent" >
-                  <MenuItem eventKey="recent_all">All</MenuItem>
-                  <MenuItem divider/>
-                  <MenuItem header>By Person</MenuItem>
-                  {this.renderUsers("recent")}
-                </NavDropdown>
-                <NavDropdown id="sortByDropdown" title="Popular" >
-                  <MenuItem eventKey="popular_all">All</MenuItem>
-                  <MenuItem divider/>
-                  <MenuItem header>By Person</MenuItem>
-                  {this.renderUsers("popular")}
-                </NavDropdown>
-              </Nav>
-            </Navbar.Collapse>
+              <Navbar.Header>
+                <Navbar.Brand>ROOM 2</Navbar.Brand>
+                <Navbar.Toggle />
+              </Navbar.Header>
 
-          </Navbar>
-        </Row>
-          <ReactSwipe key={swipeItems.length} className="carousel" swipeOptions={{continuous: true}}>
-            {swipeItems}
-          </ReactSwipe>
-        <Row>
-        </Row>
-      </Grid>
-  
+              <Navbar.Collapse>
+                <Nav pullRight activeKey={this.state.activeSortKey} onSelect={this.handleSortSelect}>
+                  <NavDropdown id="sortByDropdown" title="Recent" >
+                    <MenuItem eventKey="recent_all">All</MenuItem>
+                    <MenuItem divider/>
+                    <MenuItem header>By Person</MenuItem>
+                    {this.renderUsers("recent")}
+                  </NavDropdown>
+                  <NavDropdown id="sortByDropdown" title="Popular" >
+                    <MenuItem eventKey="popular_all">All</MenuItem>
+                    <MenuItem divider/>
+                    <MenuItem header>By Person</MenuItem>
+                    {this.renderUsers("popular")}
+                  </NavDropdown>
+                </Nav>
+              </Navbar.Collapse>
 
-        
-      </div>
-    );
+            </Navbar>
+          </Row>
+            <ReactSwipe key={swipeItems.length} className="carousel" swipeOptions={{continuous: true}}>
+              {swipeItems}
+            </ReactSwipe>
+          <Row>
+          </Row>
+        </Grid>
+    
+        </div>
+      );
+    }
   }
 }
 
