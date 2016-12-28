@@ -14,7 +14,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
 @Api(value = "Users API")
-@Path("/api/users/v1")
+@Path("/api/musicbot/users/v1")
 public abstract class UsersResource {
 	
 	@ApiOperation(value = "Get users", notes = "Get users")

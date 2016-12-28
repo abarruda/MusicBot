@@ -14,7 +14,7 @@ let apiUrl = "";
 if (window.globalConfigs.server && window.globalConfigs.apiPort) {
   apiUrl = "http://" + window.globalConfigs.server + ":" + window.globalConfigs.apiPort;
 }
-apiUrl += "/api/";
+apiUrl += "/api/musicbot/";
 
 class App extends Component {
 
@@ -23,7 +23,7 @@ class App extends Component {
 
     this.state = {
       activeSortKey: 'recent_all',
-      chatId: -141396910,
+      chatId: 0,
       music: [],
       carouselIndex: 0,
       carouselDirection: null,

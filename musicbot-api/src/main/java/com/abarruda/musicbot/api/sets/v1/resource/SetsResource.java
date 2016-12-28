@@ -14,7 +14,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 
 @Api(value = "Sets API")
-@Path("/api/sets/v1")
+@Path("/api/musicbot/sets/v1")
 public abstract class SetsResource {
 	
 	@ApiOperation(value = "Get sets", notes = "Get Sets")
