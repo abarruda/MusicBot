@@ -1,8 +1,11 @@
 package com.abarruda.musicbot.items;
 
+import java.util.List;
+
 import org.bson.Document;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 
 public class MusicSet extends RemoteContent {
 	
@@ -11,14 +14,17 @@ public class MusicSet extends RemoteContent {
 	}
 	
 	public static class Metadata {
+		public final static String FIELD_TITLE = "title";
+		public final static String FIELD_IMAGE_URL = "imageUrl";
+		
 		public String title;
 		public String imageUrl;
 		
 		public static Metadata getMetadataFromDocument(final Document doc) {
 			if (doc != null) {
 				final Metadata metadata = new Metadata();
-				metadata.title = doc.getString("title");
-				metadata.imageUrl = doc.getString("imageUrl");
+				metadata.title = doc.getString(FIELD_TITLE);
+				metadata.imageUrl = doc.getString(FIELD_IMAGE_URL);
 				return metadata;
 			}
 			return null;
@@ -32,10 +38,10 @@ public class MusicSet extends RemoteContent {
 			return toDoc(this);
 		}
 		
-		public Document toDoc(final Metadata metadata) {
+		public static Document toDoc(final Metadata metadata) {
 			final Document doc = new Document();
-			doc.append("title", metadata.title);
-			doc.append("imageUrl", metadata.imageUrl);
+			doc.append(FIELD_TITLE, metadata.title);
+			doc.append(FIELD_IMAGE_URL, metadata.imageUrl);
 			return doc;
 		}
 	}
@@ -43,20 +49,65 @@ public class MusicSet extends RemoteContent {
 	public final static String FIELD_METADATA = "metadata";
 	public final static String FIELD_STATUS = "status";
 	
+	public static class Play {
+		public final static String FIELD_USER = "user";
+		public final static String FIELD_DATE_OF_PLAY = "dateOfPlay";
+		
+		public User user;
+		public int dateOfPlay;
+		
+		public static Play getPlayFromDocument(final Document doc) {
+			if (doc != null) {
+				final Play play = new Play();
+				final User user = User.getUserFromDocument(doc.get(FIELD_USER, Document.class));
+				final int date = doc.getInteger(doc.getInteger(FIELD_DATE_OF_PLAY));
+				play.user = user;
+				play.dateOfPlay = date;
+				return play;
+			}
+			return null;
+		}
+		
+		public Document toDoc() {
+			return toDoc(this);
+		}
+		
+		public static Document toDoc(final Play play) {
+			final Document doc = new Document();
+			doc.append(FIELD_USER, play.user.toDoc());
+			doc.append(FIELD_DATE_OF_PLAY, play.dateOfPlay);
+			return doc;
+		}
+		
+	}
+	
+	public final static String FIELD_PLAYS = "plays";
+	
 	public String status;
 	public Metadata metadata;
+	public List<Play> plays;
 	
-	public MusicSet(final RemoteContent remoteContent, final String status, final Metadata metadata) {
+	public MusicSet(final RemoteContent remoteContent, final String status, final Metadata metadata, final List<Play> plays) {
 		super(remoteContent._id, remoteContent.url, remoteContent.type, remoteContent.originalUser,
 				remoteContent.originalDate, remoteContent.references);
 		this.status = status;
 		this.metadata = metadata;
+		this.plays = plays;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static MusicSet getSetFromDoc(Document doc) {
-		final String status = doc.getString("status");
-		final Metadata metadata = Metadata.getMetadataFromDocument(doc.get("metadata", Document.class));
-		return new MusicSet(getRemoteContentFromDoc(doc), status, metadata);
+		final String status = doc.getString(FIELD_STATUS);
+		final Metadata metadata = Metadata.getMetadataFromDocument(doc.get(FIELD_METADATA, Document.class));
+		final List<Play> plays = Lists.newArrayList();
+		
+		final Object playsFromDoc = doc.get(FIELD_PLAYS);
+		if (playsFromDoc != null) {
+			for (Document play : (List<Document>)playsFromDoc) {
+				plays.add(Play.getPlayFromDocument(play));
+			}
+		}
+		return new MusicSet(getRemoteContentFromDoc(doc), status, metadata, plays);
 	}
 	
 	public Document toDoc() {
@@ -68,6 +119,13 @@ public class MusicSet extends RemoteContent {
 				new RemoteContent(set._id, set.url, set.type, set.originalUser, set.originalDate, set.references ));
 		musicSetDoc.append(FIELD_STATUS, Strings.nullToEmpty(set.status));
 		musicSetDoc.append(FIELD_METADATA, set.metadata.toDoc());
+		
+		final List<Document> plays = Lists.newArrayList();
+		for (final Play play : set.plays) {
+			plays.add(play.toDoc());
+		}
+		musicSetDoc.append(FIELD_PLAYS, plays);
+		
 		return musicSetDoc;
 	}
 
