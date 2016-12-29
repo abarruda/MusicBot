@@ -50,18 +50,18 @@ public class MusicSet extends RemoteContent {
 	public final static String FIELD_STATUS = "status";
 	
 	public static class Play {
-		public final static String FIELD_USER = "user";
+		public final static String FIELD_USER_ID = "userId";
 		public final static String FIELD_DATE_OF_PLAY = "dateOfPlay";
 		
-		public User user;
+		public int userId;
 		public int dateOfPlay;
 		
 		public static Play getPlayFromDocument(final Document doc) {
 			if (doc != null) {
 				final Play play = new Play();
-				final User user = User.getUserFromDocument(doc.get(FIELD_USER, Document.class));
-				final int date = doc.getInteger(doc.getInteger(FIELD_DATE_OF_PLAY));
-				play.user = user;
+				final int userId = doc.getInteger(FIELD_USER_ID);
+				final int date = doc.getInteger(FIELD_DATE_OF_PLAY);
+				play.userId = userId;
 				play.dateOfPlay = date;
 				return play;
 			}
@@ -74,7 +74,7 @@ public class MusicSet extends RemoteContent {
 		
 		public static Document toDoc(final Play play) {
 			final Document doc = new Document();
-			doc.append(FIELD_USER, play.user.toDoc());
+			doc.append(FIELD_USER_ID, play.userId);
 			doc.append(FIELD_DATE_OF_PLAY, play.dateOfPlay);
 			return doc;
 		}

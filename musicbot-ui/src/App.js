@@ -5,6 +5,7 @@ import URI from 'urijs';
 import moment from 'moment';
 import $ from 'jquery';
 import {Alert} from 'react-bootstrap';
+import {Button} from 'react-bootstrap';
 import {Carousel} from 'react-bootstrap';
 import {Grid, Row} from 'react-bootstrap';
 import {Nav, Navbar, NavDropdown, MenuItem} from 'react-bootstrap';
@@ -26,6 +27,7 @@ class App extends Component {
     this.state = {
       activeSortKey: 'recent_all',
       chatId: 0,
+      userId: 0,
       music: [],
       loadedMusic: false,
       carouselIndex: 0,
@@ -35,14 +37,32 @@ class App extends Component {
 
     this.handleCarouselChange = this.handleCarouselChange.bind(this);
     this.handleSortSelect = this.handleSortSelect.bind(this);
+    //this.handleSwipeItemClick = this.handleSwipeItemClick.bind(this);
   };
 
   componentDidMount() {
-    let chatId = new URI().search(true).chatId;
+    let uri = new URI().search(true);
+    let chatId = uri.chatId;
+    let userId = uri.userId;
     
     this.loadUsers(chatId);
     this.loadRecentMusicSets(chatId, 'P7D', null);
-    this.setState({chatId: chatId});
+    this.setState({chatId: chatId, userId: userId});
+  }
+
+  playMusicSet(chatId, setId, userId) {
+    let url = apiUrl + 'sets/v1/' + chatId + "/play/" + setId + "/";
+    if (userId != null) {
+      url += '?userId=' + userId;
+    }
+
+    $.ajax({
+      url: url,
+      method: 'POST',
+      success: function(data) {
+        console.log(data);
+      }
+    });
   }
 
   loadUsers(chatId) {
@@ -127,15 +147,26 @@ class App extends Component {
     return items;
   }
 
+  handleSwipeItemClick(event) {
+    this.self.playMusicSet(this.self.state.chatId, this.set._id, this.self.state.userId);
+    window.location = this.set.url;
+  }
+
   renderSwipeItems() {
+    var self = this;
+
     var items = this.state.music.map(function(set) {
       var date = moment(set.originalDate * 1000).format('MMMM Do YYYY, h:mm a');
 
       return (
         <div key={set.url}>
-          <a href={set.url}><Image src={set.metadata.imageUrl} responsive /></a>
+          <Button bsStyle="link" key={set.url} onClick={self.handleSwipeItemClick.bind({self: self, set: set})}>
+            <Image src={set.metadata.imageUrl} responsive />
+          </Button>
           <h4>{set.metadata.title}</h4>
             Originally posted by {set.originalUser.firstName} on {date}
+            <br />
+            {set.plays.length} play(s).
             <br />
             {set.references.length} reference(s).
         </div>
@@ -184,7 +215,7 @@ class App extends Component {
 
   render() {
 
-    if (typeof this.state.chatId === 'undefined') {
+    if (typeof this.state.chatId === 'undefined' || typeof this.state.userId === 'undefined') {
       return (
         <Alert bsStyle="danger">
           <h4>No Data Found!</h4>

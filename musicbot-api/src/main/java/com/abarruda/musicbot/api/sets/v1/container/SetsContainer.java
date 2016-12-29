@@ -26,6 +26,12 @@ import com.google.common.primitives.Ints;
 public class SetsContainer extends SetsResource {
 	private static final Logger logger = LogManager.getLogger(SetsContainer.class);
 	
+	final DatabaseFacade db;
+	
+	public SetsContainer() {
+		db = MongoDbFacade.getMongoDb();
+	}
+	
 	private static ImmutableSet<String> setUrls = ImmutableSet.copyOf(
 			Iterables.concat(ContentType.SOUNDCLOUD.hostNames, ContentType.YOUTUBE.hostNames));
 
@@ -51,7 +57,7 @@ public class SetsContainer extends SetsResource {
 	private static final Predicate<MusicSet> popularSetPredicate = new Predicate<MusicSet>() {
 		@Override
 		public boolean apply(MusicSet input) {
-			return input.references.size() > 2;
+			return (input.references.size() > 2) || input.plays.size() > 2;
 		}
 	};
 	
@@ -66,7 +72,7 @@ public class SetsContainer extends SetsResource {
 
 		@Override
 		public int compare(MusicSet left, MusicSet right) {
-			return Ints.compare(left.originalDate, right.originalDate);
+			return Ints.compare(right.originalDate, left.originalDate);
 		}
 	};
 	
@@ -78,7 +84,6 @@ public class SetsContainer extends SetsResource {
 			}
 		};
 	}
-	
 	
 	@Override
 	public Iterable<MusicSet> getPopularSetsByChatId(final String id, final String userId) {
@@ -92,7 +97,6 @@ public class SetsContainer extends SetsResource {
 			listOfPredicates.add(getUserSetPredicate(userId));
 		}
 		
-		final DatabaseFacade db = MongoDbFacade.getMongoDb();
 		final List<MusicSet> musicSets = db.getMusicSets(id);
 		
 		final List<MusicSet> filteredMusicSets = Lists.newLinkedList(
@@ -122,7 +126,6 @@ public class SetsContainer extends SetsResource {
 			listOfPredicates.add(getUserSetPredicate(user));
 		}
 		
-		final DatabaseFacade db = MongoDbFacade.getMongoDb();
 		final List<MusicSet> musicSets = db.getMusicSets(id);
 		
 		final List<MusicSet> filteredMusicSets = Lists.newLinkedList(
@@ -142,13 +145,18 @@ public class SetsContainer extends SetsResource {
 			listOfPredicates.add(getUserSetPredicate(userId));
 		}
 		
-		final DatabaseFacade db = MongoDbFacade.getMongoDb();
 		final List<MusicSet> musicSets = db.getMusicSets(chatId);
 		
 		final List<MusicSet> filteredMusicSets = Lists.newLinkedList(
 				Iterables.filter(musicSets, 
 						Predicates.and(listOfPredicates)));
 		return filteredMusicSets;
+	}
+
+	@Override
+	public void playSet(String chatId, String setId, String userId) {
+		logger.info("Set '" + setId + "' from chat '" + chatId + "' being played by '" + userId + "'.");
+		db.addPlayToMusicSet(chatId, setId, Integer.valueOf(userId));
 	}
 	
 }

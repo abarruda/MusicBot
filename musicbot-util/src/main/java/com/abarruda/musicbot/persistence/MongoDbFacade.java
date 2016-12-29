@@ -3,6 +3,7 @@ package com.abarruda.musicbot.persistence;
 import static com.mongodb.client.model.Filters.eq;
 import static java.util.Arrays.asList;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,6 +17,7 @@ import com.abarruda.musicbot.config.Config;
 import com.abarruda.musicbot.items.ContentType;
 import com.abarruda.musicbot.items.DetectedContent;
 import com.abarruda.musicbot.items.MusicSet;
+import com.abarruda.musicbot.items.MusicSet.Play;
 import com.abarruda.musicbot.items.RemoteContent;
 import com.abarruda.musicbot.items.TermResponse;
 import com.abarruda.musicbot.items.User;
@@ -306,6 +308,26 @@ public class MongoDbFacade implements DatabaseFacade {
 			getRemoteContentCollection(chatId).updateOne(eq(SET_URL_BSON, set.url), update);
 		} catch (Exception e) {
 			logger.error(e);
+		}
+	}
+	
+	@Override
+	public void addPlayToMusicSet(final String chatId, final String setId, final int userId) {
+		try {
+			final Play newPlay = new Play();
+			newPlay.userId = userId;
+			// since we're using Javascript dates everywhere, be consistent here
+			newPlay.dateOfPlay = (int) (new Date()).getTime() / 1000; 
+			
+			final Document newPlayDoc = newPlay.toDoc();
+			
+			final BasicDBObject update = new BasicDBObject("$push", new BasicDBObject(MusicSet.FIELD_PLAYS, newPlayDoc));
+			final UpdateResult result = getRemoteContentCollection(chatId).updateOne(eq("_id", new ObjectId(setId)), update);
+			if (result.getMatchedCount() != 1) {
+				throw new Exception("couldn't match!");
+			}
+		} catch (final Exception e) {
+			logger.error("Could not update play count! [chatId: " + chatId + " , set: " + setId + "]");
 		}
 	}
 	

@@ -47,6 +47,8 @@ public interface DatabaseFacade {
 	
 	public List<MusicSet> getMusicSets(final String chatId);
 	
+	public void addPlayToMusicSet(final String chatId, final String setId, final int userId);
+	
 	public List<TermResponse> getTermResponses(final String chatId);
 	
 	public void insertTermResponse(final String chatId, final TermResponse termResponse);

@@ -1,6 +1,7 @@
 package com.abarruda.musicbot.api.sets.v1.resource;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -57,5 +58,18 @@ public abstract class SetsResource {
 			@QueryParam(value="userId")
 			final String user);
 
-
+	@ApiOperation(value = "Play music content")
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("{id}/play/{setId}")
+	public abstract void playSet(
+			@PathParam(value = "id")
+			final String chatId,
+			
+			@PathParam(value = "setId")
+			final String setId,
+			
+			@ApiParam(value = "User playing the set", required = false)
+			@QueryParam(value = "userId")
+			final String userId);
 }
