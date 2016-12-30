@@ -150,6 +150,8 @@ public class SetsContainer extends SetsResource {
 		final List<MusicSet> filteredMusicSets = Lists.newLinkedList(
 				Iterables.filter(musicSets, 
 						Predicates.and(listOfPredicates)));
+		
+		Collections.sort(filteredMusicSets, Ordering.from(orderByMostRecent));
 		return filteredMusicSets;
 	}
 
