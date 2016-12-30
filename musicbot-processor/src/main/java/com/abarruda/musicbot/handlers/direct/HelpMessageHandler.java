@@ -33,7 +33,7 @@ public class HelpMessageHandler implements MessageHandler {
 			if (input.hasText()) {
 				final Command command = CommandUtil.getCommandFromMessage(input);
 				for (String text: HELP_COMMANDS) {
-					if (command.getCommand().equals(text)) {
+					if (command.getCommand().toLowerCase().equals(text)) {
 						return true;
 					}
 				}
