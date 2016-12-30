@@ -37,7 +37,6 @@ class App extends Component {
 
     this.handleCarouselChange = this.handleCarouselChange.bind(this);
     this.handleSortSelect = this.handleSortSelect.bind(this);
-    //this.handleSwipeItemClick = this.handleSwipeItemClick.bind(this);
   };
 
   componentDidMount() {
@@ -166,9 +165,7 @@ class App extends Component {
           <h4>{set.metadata.title}</h4>
             Originally posted by {set.originalUser.firstName} on {date}
             <br />
-            {set.plays.length} play(s).
-            <br />
-            {set.references.length} reference(s).
+            {set.plays.length} play(s), {set.references.length} reference(s).
         </div>
       );
     });

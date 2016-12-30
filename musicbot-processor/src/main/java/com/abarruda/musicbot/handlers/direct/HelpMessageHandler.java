@@ -14,18 +14,17 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 
 public class HelpMessageHandler implements MessageHandler {
-	
-	private static final String COMMAND_SET_RESPONSE = "Auto Responder";
-	private static final String COMMAND_SEND_FEEDBACK = "Send Feedback/Report Bug";
 
 	private static final ImmutableSet<String> HELP_COMMANDS = ImmutableSet.<String>of("/help", "help");
 	
 	private static final String HELP_MESSAGE = "*Commands*\n\n" + 
-			"`Auto Responder`\n" + 
-			"Provide a response for the specified (case insensitive) term.  You are allowed one response and it will expire after 1 week." + 
+			"`" + TermResponseInputHandler.AUTO_RESPONDER_COMMAND + "`\n" + 
+			"Provide a response for the specified (case insensitive) term.  You are allowed one response and it will expire after 1 week.\n" + 
 			"\n" + 
+			"`" + BrowseSetsHandler.COMMAND_BROWSE_MUSIC + "`\n" + 
+			"Get a customized link to browse and play the music detected in the groups you belong to.\n" + 
 			"\n" + 
-			"`Send Feedback/Report Bug`\n" + 
+			"`" + FeedbackHandler.FEEDBACK_COMMAND + "`\n" + 
 			"Report a bug with the bot or request a feature!";
 	
 	private static final Predicate<Message> HELP_MESSAGE_PREDICATE = new Predicate<Message>() {
@@ -54,8 +53,9 @@ public class HelpMessageHandler implements MessageHandler {
 							.setChatId(message.getChatId().toString())
 							.setSilent(true)
 							.setText(HELP_MESSAGE)
-							.addButtonRow(TextButtonResponseBuilder.newButton(COMMAND_SET_RESPONSE, ""))
-							.addButtonRow(TextButtonResponseBuilder.newButton(COMMAND_SEND_FEEDBACK, ""));
+							.addButtonRow(TextButtonResponseBuilder.newButton(TermResponseInputHandler.AUTO_RESPONDER_COMMAND))
+							.addButtonRow(TextButtonResponseBuilder.newButton(BrowseSetsHandler.COMMAND_BROWSE_MUSIC))
+							.addButtonRow(TextButtonResponseBuilder.newButton(FeedbackHandler.FEEDBACK_COMMAND));
 					
 					return TextButtonResponse.createResponse(builder);
 				}

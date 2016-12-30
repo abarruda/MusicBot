@@ -21,7 +21,8 @@ public class FeedbackHandler implements MessageHandler {
 	
 	private static final Logger logger = LogManager.getLogger(FeedbackHandler.class);
 	
-	private static final String COMMAND = "Send Feedback/Report Bug";
+	public static final String FEEDBACK_COMMAND = "Send Feedback/Report Bug";
+	
 	private static final String OUTPUT_FILE = "feedback_bugs.log";
 	private final static long USER_INTERACTION_TIMEOUT = 7L;
 	
@@ -45,7 +46,7 @@ public class FeedbackHandler implements MessageHandler {
 					final String chatId = message.getChatId().toString();
 					final String userId = message.getFrom().getId().toString();
 					
-					if (message.getText().equals(COMMAND) && cache.getIfPresent(userId) == null) {
+					if (message.getText().equals(FEEDBACK_COMMAND) && cache.getIfPresent(userId) == null) {
 						cache.put(userId, true);
 						return ForceReplyTextResponse.createResponse(
 								chatId, 

@@ -7,6 +7,7 @@ public class ButtonResponse extends BotResponse {
 	public static class Button {
 		public String buttonText;
 		public String buttonData;
+		public String buttonUrl;
 	}
 	
 	public String chatId;

@@ -17,6 +17,7 @@ private static final Logger logger = LogManager.getLogger(Config.class);
 	public static String DATABASE_ADDRESS = "db.address";
 	public static String DATABASE_NAME = "db.name";
 	public static String AUTORESPONSE_DURATION = "handler.autoresponse.duration";
+	public static String WEBSITE = "website";
 	
 	public static String LOGGING_FILE_LOCATION = "logging.dir";
 	

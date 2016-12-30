@@ -1,7 +1,6 @@
 package com.abarruda.musicbot.handlers.direct;
 
 import java.util.Date;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -12,15 +11,16 @@ import org.telegram.telegrambots.api.objects.Message;
 
 import com.abarruda.musicbot.ChatManager;
 import com.abarruda.musicbot.handlers.CallbackQueryHandler;
+import com.abarruda.musicbot.handlers.CallbackQueryUtil;
+import com.abarruda.musicbot.handlers.ChatListUtil;
 import com.abarruda.musicbot.handlers.MessageHandler;
+import com.abarruda.musicbot.handlers.CallbackQueryUtil.CallbackQueryInfo;
 import com.abarruda.musicbot.items.TermResponse;
 import com.abarruda.musicbot.persistence.DatabaseFacade;
 import com.abarruda.musicbot.persistence.MongoDbFacade;
 import com.abarruda.musicbot.processor.responder.responses.BotResponse;
 import com.abarruda.musicbot.processor.responder.responses.ForceReplyTextResponse;
-import com.abarruda.musicbot.processor.responder.responses.InlineButtonResponse;
 import com.abarruda.musicbot.processor.responder.responses.TextResponse;
-import com.abarruda.musicbot.processor.responder.responses.InlineButtonResponse.InlineButtonResponseBuilder;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
@@ -28,7 +28,8 @@ public class TermResponseInputHandler implements MessageHandler, CallbackQueryHa
 	
 	private static final Logger logger = LogManager.getLogger(TermResponseInputHandler.class);
 	
-	private final static String COMMAND = "Auto Responder";
+	public final static String AUTO_RESPONDER_COMMAND = "Auto Responder";
+	
 	private final static String CREATOR = "aaron";
 	private final static long USER_INTERACTION_TIMEOUT = 3L;
 	
@@ -98,39 +99,46 @@ public class TermResponseInputHandler implements MessageHandler, CallbackQueryHa
 
 			@Override
 			public BotResponse call() throws Exception {
-				final int userId = query.getFrom().getId();
-				final String directChatId = query.getMessage().getChatId().toString();
-				final String chatIdFromButton = query.getData();
-				
-				if (!chatManger.getChatsForUserFromCache(userId).values().contains(chatIdFromButton)) {
-					return getInactiveTextResponse(directChatId);
-				}
-				
-				final String chatIdForAutoResponder = query.getData();
-				
-				// check if they already have made their allotment
-				for (final TermResponse tr : db.getTermResponses(chatIdForAutoResponder)) {
-					if (tr.userId == userId) {
-						return TextResponse.createResponse(
-								directChatId, 
-								"Sorry, you have already made a submission, now fuck off and wait a week!", 
-								false,
-								false);
+				final CallbackQueryInfo queryInfo = CallbackQueryUtil.getInfo(query);
+				if (queryInfo.source.equals(TermResponseInputHandler.class.getSimpleName())) {
+					
+					final int userId = query.getFrom().getId();
+					final String directChatId = query.getMessage().getChatId().toString();
+					final String chatIdFromButton = queryInfo.data;
+					
+					if (!chatManger.getChatsForUserFromCache(userId).values().contains(chatIdFromButton)) {
+						return getInactiveTextResponse(directChatId);
 					}
+					
+					final String chatIdForAutoResponder = queryInfo.data;
+					
+					// check if they already have made their allotment
+					for (final TermResponse tr : db.getTermResponses(chatIdForAutoResponder)) {
+						if (tr.userId == userId) {
+							return TextResponse.createResponse(
+									directChatId, 
+									"Sorry, you have already made a submission, now fuck off and wait a week!", 
+									false,
+									false);
+						}
+					}
+					
+					final AutoResponderInputState state = new AutoResponderInputState();
+					state.chatId = chatIdForAutoResponder;
+					cache.put(userId, state);
+					
+					return ForceReplyTextResponse.createResponse(
+							directChatId,
+							"What term do you want to look for?",
+							false, 
+							false);
 				}
+				return null;
 				
-				final AutoResponderInputState state = new AutoResponderInputState();
-				state.chatId = chatIdForAutoResponder;
-				cache.put(userId, state);
-				
-				return ForceReplyTextResponse.createResponse(
-						directChatId,
-						"What term do you want to look for?",
-						false, 
-						false);
 			}
 			
 		};
+		
 	}
 
 	@Override
@@ -142,25 +150,13 @@ public class TermResponseInputHandler implements MessageHandler, CallbackQueryHa
 				
 				if (message.hasText()) {
 					final int userId = message.getFrom().getId();
-					final String chatId = message.getChatId().toString();
+					final String directMessageChatId = message.getChatId().toString();
 					
-					if (message.getText().equals(COMMAND)) {
+					if (message.getText().equals(AUTO_RESPONDER_COMMAND)) {
 						
-						final Map<String, String> chatsForUser = chatManger.getChatsForUserFromCache(userId);
-						if (chatsForUser.isEmpty()) {
-							return getInactiveTextResponse(chatId);
-						} else {
-
-							final InlineButtonResponseBuilder builder = new InlineButtonResponseBuilder()
-									.setChatId(chatId)
-									.setSilent(false)
-									.setText("Which chat would you like to apply the Auto Responder to?");
-							
-							for (Map.Entry<String, String> chat : chatsForUser.entrySet()) {
-								builder.addButtonRow(InlineButtonResponseBuilder.newButton(chat.getKey(), chat.getValue()));
-							}
-							return InlineButtonResponse.createResponse(builder);
-						}
+						return ChatListUtil.getChatListForUser(directMessageChatId, userId, 
+								"Which chat would you like to apply the Auto Responder to?",
+								TermResponseInputHandler.class.getSimpleName());
 						
 					} else if (cache.getIfPresent(userId) != null) {
 						
@@ -178,7 +174,7 @@ public class TermResponseInputHandler implements MessageHandler, CallbackQueryHa
 							responseText.append("' is seen?");
 							
 							return ForceReplyTextResponse.createResponse(
-									chatId, 
+									directMessageChatId, 
 									responseText.toString(),
 									false, 
 									false);
@@ -194,7 +190,7 @@ public class TermResponseInputHandler implements MessageHandler, CallbackQueryHa
 							db.insertTermResponse(state.chatId, autoResponse);
 							cache.invalidate(userId);
 							return TextResponse.createResponse(
-									chatId, 
+									directMessageChatId, 
 									"Successfully created!  Wait a minute for the response to become active.", 
 									false,
 									false);

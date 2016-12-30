@@ -8,6 +8,7 @@ import org.telegram.telegrambots.TelegramBotsApi;
 import org.telegram.telegrambots.logging.BotLogger;
 
 import com.abarruda.musicbot.config.Config;
+import com.abarruda.musicbot.handlers.direct.BrowseSetsHandler;
 import com.abarruda.musicbot.handlers.direct.FeedbackHandler;
 import com.abarruda.musicbot.handlers.direct.HelpMessageHandler;
 import com.abarruda.musicbot.handlers.direct.StatsHandler;
@@ -43,8 +44,6 @@ public class BotServer {
 		
 		new MusicSetMetadataProcessor().start();
 		
-		final TermResponseInputHandler autoResponder = new TermResponseInputHandler();
-		
 		processor.addGroupHandler(new ChatManagerHandler());
 		processor.addGroupHandler(new SimpleResponseHandler());
 		processor.addGroupHandler(new RemoteContentHandler());
@@ -53,9 +52,14 @@ public class BotServer {
 		processor.addPrivateHandler(new HelpMessageHandler());
 		processor.addPrivateHandler(new FeedbackHandler());
 		processor.addPrivateHandler(new StatsHandler());
-		processor.addPrivateHandler(autoResponder);
 		
+		final TermResponseInputHandler autoResponder = new TermResponseInputHandler();
+		processor.addPrivateHandler(autoResponder);
 		processor.addCallbackQueryHandler(autoResponder);
+		
+		final BrowseSetsHandler browseSetsHandler = new BrowseSetsHandler();
+		processor.addPrivateHandler(browseSetsHandler);
+		processor.addCallbackQueryHandler(browseSetsHandler);
 		
 		final Responder responder = Responder.initializeResponder(responseQueue, processor);
 		responder.start();

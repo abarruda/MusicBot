@@ -196,7 +196,11 @@ public class LongPollingProcessor extends TelegramLongPollingBot implements Resp
 			for (final Button buttonMapping : buttonRowMapping) {
 				final InlineKeyboardButton button = new InlineKeyboardButton();
 				button.setText(buttonMapping.buttonText);
-				button.setCallbackData(buttonMapping.buttonData);
+				if (buttonMapping.buttonUrl != null) {
+					button.setUrl(buttonMapping.buttonUrl);
+				} else {
+					button.setCallbackData(buttonMapping.buttonData);
+				}
 				inlineButtonRow.add(button);
 			}
 			buttonRows.add(inlineButtonRow);
