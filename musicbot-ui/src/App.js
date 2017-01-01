@@ -163,7 +163,7 @@ class App extends Component {
             <Image src={set.metadata.imageUrl} responsive />
           </Button>
           <h4>{set.metadata.title}</h4>
-            Originally posted by {set.originalUser.firstName} on {date}
+            Posted by {set.originalUser.firstName} on {date}
             <br />
             {set.plays.length} play(s), {set.references.length} reference(s).
         </div>
