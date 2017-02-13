@@ -18,7 +18,6 @@ import org.telegram.telegrambots.api.objects.Message;
 
 import com.abarruda.musicbot.config.Config;
 import com.abarruda.musicbot.persistence.DatabaseFacade;
-import com.abarruda.musicbot.persistence.MongoDbFacade;
 import com.abarruda.musicbot.items.TermResponse;
 import com.abarruda.musicbot.processor.responder.responses.TextResponse;
 import com.google.common.base.Splitter;
@@ -67,10 +66,10 @@ public class SimpleResponseHandler {
 	};
 	
 	@Inject
-	public SimpleResponseHandler(final EventBus eventBus) {
+	public SimpleResponseHandler(final EventBus eventBus, final DatabaseFacade db) {
 		this.eventBus = eventBus;
 		mapping = loadResponsesFromFile();
-		db = MongoDbFacade.getMongoDb();
+		this.db = db;
 		final ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("Term-Response-Maintainer-thread-%d").build();
 		executor = Executors.newScheduledThreadPool(1, threadFactory);
 		executor.scheduleAtFixedRate(termResponseMaintainer, 0, 15, TimeUnit.SECONDS);

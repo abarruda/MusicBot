@@ -3,9 +3,7 @@ package com.abarruda.musicbot.modules;
 import com.abarruda.musicbot.BotServer;
 import com.abarruda.musicbot.ChatManager;
 import com.abarruda.musicbot.MessageManager;
-import com.abarruda.musicbot.config.Configuration;
 import com.abarruda.musicbot.config.ConfigurationModule;
-import com.abarruda.musicbot.config.ConfigurationProvider;
 import com.abarruda.musicbot.handlers.direct.BrowseSetsHandler;
 import com.abarruda.musicbot.handlers.direct.FeedbackHandler;
 import com.abarruda.musicbot.handlers.direct.HelpMessageHandler;
@@ -15,6 +13,7 @@ import com.abarruda.musicbot.handlers.group.ChatManagerHandler;
 import com.abarruda.musicbot.handlers.group.LoggingHandler;
 import com.abarruda.musicbot.handlers.group.SimpleResponseHandler;
 import com.abarruda.musicbot.handlers.group.content.RemoteContentHandler;
+import com.abarruda.musicbot.persistence.DatabaseModule;
 import com.abarruda.musicbot.processor.metadata.MusicSetMetadataProcessor;
 import com.abarruda.musicbot.processor.responder.Responder;
 import com.google.common.eventbus.EventBus;
@@ -32,6 +31,7 @@ public class BotModule extends AbstractModule {
 	@Override
 	protected void configure() {
 		install(new ConfigurationModule(configFileLocation));
+		install(new DatabaseModule());
 		
 		bind(BotServer.class).in(Scopes.SINGLETON);
 		bind(EventBus.class).in(Scopes.SINGLETON);
@@ -39,7 +39,6 @@ public class BotModule extends AbstractModule {
 		bind(Responder.class).in(Scopes.SINGLETON);
 		bind(ChatManager.class).in(Scopes.SINGLETON);
 		bind(MusicSetMetadataProcessor.class).in(Scopes.SINGLETON);
-		
 		
 		// Handlers
 		bind(ChatManagerHandler.class);
@@ -51,7 +50,6 @@ public class BotModule extends AbstractModule {
 		bind(StatsHandler.class);
 		bind(TermResponseInputHandler.class);
 		bind(BrowseSetsHandler.class);
-		
 	}
 
 }

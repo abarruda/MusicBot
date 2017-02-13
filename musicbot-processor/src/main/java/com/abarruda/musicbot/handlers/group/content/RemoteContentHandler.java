@@ -9,7 +9,6 @@ import org.telegram.telegrambots.api.objects.MessageEntity;
 import org.telegram.telegrambots.api.objects.User;
 
 import com.abarruda.musicbot.persistence.DatabaseFacade;
-import com.abarruda.musicbot.persistence.MongoDbFacade;
 import com.abarruda.musicbot.items.DetectedContent;
 import com.abarruda.musicbot.items.RemoteContent;
 import com.abarruda.musicbot.processor.responder.responses.TextResponse;
@@ -31,12 +30,11 @@ public class RemoteContentHandler {
 	private static final String TYPE_URL = "url";
 	
 	private final EventBus eventBus;
-	private DatabaseFacade db;
-	
+	private final DatabaseFacade db;
 	
 	@Inject
-	public RemoteContentHandler(final EventBus eventBus) {
-		db = MongoDbFacade.getMongoDb();
+	public RemoteContentHandler(final EventBus eventBus, final DatabaseFacade db) {
+		this.db = db;
 		this.eventBus = eventBus;
 	}
 		

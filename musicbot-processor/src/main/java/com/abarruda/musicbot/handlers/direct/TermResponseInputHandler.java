@@ -14,7 +14,6 @@ import com.abarruda.musicbot.handlers.ChatListUtil;
 import com.abarruda.musicbot.handlers.CallbackQueryUtil.CallbackQueryInfo;
 import com.abarruda.musicbot.items.TermResponse;
 import com.abarruda.musicbot.persistence.DatabaseFacade;
-import com.abarruda.musicbot.persistence.MongoDbFacade;
 import com.abarruda.musicbot.processor.responder.responses.ForceReplyTextResponse;
 import com.abarruda.musicbot.processor.responder.responses.TextResponse;
 import com.google.common.cache.Cache;
@@ -50,8 +49,11 @@ public class TermResponseInputHandler {
 	}
 	
 	@Inject
-	public TermResponseInputHandler(final EventBus eventBus, final ChatManager chatManager) {
-		this.db = MongoDbFacade.getMongoDb();
+	public TermResponseInputHandler(
+			final EventBus eventBus,
+			final DatabaseFacade db,
+			final ChatManager chatManager) {
+		this.db = db;
 		this.eventBus = eventBus;
 		this.chatManger = chatManager;
 		

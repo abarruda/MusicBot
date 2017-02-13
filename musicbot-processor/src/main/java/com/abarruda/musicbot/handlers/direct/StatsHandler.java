@@ -8,7 +8,6 @@ import com.abarruda.musicbot.handlers.CommandUtil;
 import com.abarruda.musicbot.handlers.CommandUtil.Command;
 import com.abarruda.musicbot.items.TermResponse;
 import com.abarruda.musicbot.persistence.DatabaseFacade;
-import com.abarruda.musicbot.persistence.MongoDbFacade;
 import com.abarruda.musicbot.processor.responder.responses.TextResponse;
 import com.google.common.base.Strings;
 import com.google.common.eventbus.EventBus;
@@ -18,13 +17,14 @@ import com.google.inject.Inject;
 public class StatsHandler {
 	
 	private static final String COMMAND = "/stats";
-	private final DatabaseFacade db = MongoDbFacade.getMongoDb();
 	
 	private final EventBus eventBus;
+	private final DatabaseFacade db;
 	
 	@Inject
-	public StatsHandler(final EventBus eventBus) {
+	public StatsHandler(final EventBus eventBus, final DatabaseFacade db) {
 		this.eventBus = eventBus;
+		this.db = db;
 	}
 
 	@Subscribe

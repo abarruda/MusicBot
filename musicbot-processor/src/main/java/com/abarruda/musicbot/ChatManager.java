@@ -7,28 +7,30 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import com.abarruda.musicbot.persistence.DatabaseFacade;
-import com.abarruda.musicbot.persistence.MongoDbFacade;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 import com.google.common.collect.Maps;
+import com.google.inject.Inject;
 
 public class ChatManager {
 	
 	private static final int USER_EXPIRATION_DAYS = 7;
 	
-	private DatabaseFacade db;
+	private final DatabaseFacade db;
 	private Map<String, LoadingCache<String, String>> cacheMap;
 	private Map<String, String> chatIdToChatNameMapping;
 	
-	private static ChatManager chatManager;
-	
-	public ChatManager() {
+	@Inject
+	public ChatManager(final DatabaseFacade db) {
 		cacheMap = Maps.newHashMap();
 		chatIdToChatNameMapping = Maps.newHashMap();
-		db = MongoDbFacade.getMongoDb();
+		this.db = db;
+	}
+	
+	public void start() {
 		loadCacheFromDb();
 	}
 	
@@ -72,13 +74,6 @@ public class ChatManager {
 			cacheMap.put(chatId, getNewCacheForChat(chatId));
 			chatIdToChatNameMapping.put(chatId, chatName);
 		}
-	}
-	
-	public static ChatManager getChatManager() {
-		if (chatManager == null) {
-			chatManager = new ChatManager();
-		}
-		return chatManager;
 	}
 	
 	public void update(final String chatId, final String chatName, final Integer userId, final String firstName, final String lastName, final String dateString) {

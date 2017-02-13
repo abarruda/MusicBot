@@ -14,6 +14,7 @@ import org.bson.Document;
 import org.bson.types.ObjectId;
 
 import com.abarruda.musicbot.config.Config;
+import com.abarruda.musicbot.config.Configuration;
 import com.abarruda.musicbot.items.ContentType;
 import com.abarruda.musicbot.items.DetectedContent;
 import com.abarruda.musicbot.items.MusicSet;
@@ -24,6 +25,7 @@ import com.abarruda.musicbot.items.User;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.inject.Inject;
 import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
@@ -52,6 +54,17 @@ public class MongoDbFacade implements DatabaseFacade {
 	
 	private final MongoClient mongoClient;
 	private final MongoDatabase db;
+	
+	@Inject
+	public MongoDbFacade(final Configuration configuration) {
+		final String address = configuration.getConfig(Configuration.DATABASE_ADDRESS);
+		final String databaseName = configuration.getConfig(Configuration.DATABASE_NAME);
+		
+		final List<ServerAddress> seeds = Lists.newArrayList(new ServerAddress(address)); 
+		final List<MongoCredential> creds = Lists.newArrayList(MongoCredential.createMongoCRCredential("admin", "admin", "devmongo123".toCharArray()));
+		mongoClient = new MongoClient(seeds, creds);
+		db = mongoClient.getDatabase(databaseName);
+	}
 	
 	private MongoDbFacade(String address, String databaseName) {
 		final List<ServerAddress> seeds = Lists.newArrayList(new ServerAddress(address)); 

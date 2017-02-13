@@ -77,6 +77,7 @@ public class BotServer {
 	}
 	
 	public void startServices() {
+		this.chatManager.start();
 		this.responder.start();
 		this.eventBus.register(this.responder);
 		this.metadataProcessor.start();
