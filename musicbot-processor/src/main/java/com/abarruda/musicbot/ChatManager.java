@@ -25,7 +25,7 @@ public class ChatManager {
 	
 	private static ChatManager chatManager;
 	
-	private ChatManager() {
+	public ChatManager() {
 		cacheMap = Maps.newHashMap();
 		chatIdToChatNameMapping = Maps.newHashMap();
 		db = MongoDbFacade.getMongoDb();

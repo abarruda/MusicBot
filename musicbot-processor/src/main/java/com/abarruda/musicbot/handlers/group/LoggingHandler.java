@@ -5,7 +5,6 @@ import java.io.FileFilter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Date;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -14,16 +13,15 @@ import org.apache.log4j.Logger;
 import org.telegram.telegrambots.api.objects.Message;
 
 import com.abarruda.musicbot.config.Config;
-import com.abarruda.musicbot.handlers.MessageHandler;
-import com.abarruda.musicbot.processor.responder.responses.BotResponse;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
+import com.google.common.eventbus.Subscribe;
 
-public class LoggingHandler implements MessageHandler {
+public class LoggingHandler {
 	private static final Logger logger = LogManager.getLogger(LoggingHandler.class);
 	
 	private static final String LOG_FILE_DIR = Config.getConfig(Config.LOGGING_FILE_LOCATION);
@@ -110,25 +108,24 @@ public class LoggingHandler implements MessageHandler {
 		}
 	}
 
-	@Override
-	public Callable<BotResponse> handleMessage(Message message) {
-		return new Callable<BotResponse>() {
-
+	@Subscribe
+	public void handleMessage(Message message) {
+		
+		new Thread(new Runnable() {
 			@Override
-			public BotResponse call() throws Exception {
+			public void run() {
+				
 				if (message.hasText()) {
-					
 					try {
 						writeMessageToLog(message);
 					} catch (final Exception e) {
 						logger.error("Unable to log message for chat " + message.getChatId().toString() + "!", e);
 					}
-					
-					
 				}
-				return null;
+				
 			}
-		};
+		}).start();
+		
 	}
 
 }

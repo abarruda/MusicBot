@@ -1,19 +1,18 @@
 package com.abarruda.musicbot.handlers.direct;
 
-import java.util.concurrent.Callable;
-
 import org.telegram.telegrambots.api.objects.Message;
 
 import com.abarruda.musicbot.handlers.CommandUtil;
-import com.abarruda.musicbot.handlers.MessageHandler;
 import com.abarruda.musicbot.handlers.CommandUtil.Command;
-import com.abarruda.musicbot.processor.responder.responses.BotResponse;
 import com.abarruda.musicbot.processor.responder.responses.TextButtonResponse;
 import com.abarruda.musicbot.processor.responder.responses.TextButtonResponse.TextButtonResponseBuilder;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
+import com.google.inject.Inject;
 
-public class HelpMessageHandler implements MessageHandler {
+public class HelpMessageHandler {
 
 	private static final ImmutableSet<String> HELP_COMMANDS = ImmutableSet.<String>of("/help", "help");
 	
@@ -42,12 +41,20 @@ public class HelpMessageHandler implements MessageHandler {
 		}
 	};
 	
-	@Override
-	public Callable<BotResponse> handleMessage(Message message) {
-		return new Callable<BotResponse>() {
-
+	private final EventBus eventBus;
+	
+	@Inject
+	public HelpMessageHandler(final EventBus eventBus) {
+		this.eventBus = eventBus;
+	}
+	
+	@Subscribe
+	public void handleMessage(final Message message) {
+		
+		new Thread(new Runnable() {
+			
 			@Override
-			public BotResponse call() throws Exception {
+			public void run() {
 				if (HELP_MESSAGE_PREDICATE.apply(message)) {
 					final TextButtonResponseBuilder builder = new TextButtonResponseBuilder()
 							.setChatId(message.getChatId().toString())
@@ -57,12 +64,12 @@ public class HelpMessageHandler implements MessageHandler {
 							.addButtonRow(TextButtonResponseBuilder.newButton(BrowseSetsHandler.COMMAND_BROWSE_MUSIC))
 							.addButtonRow(TextButtonResponseBuilder.newButton(FeedbackHandler.FEEDBACK_COMMAND));
 					
-					return TextButtonResponse.createResponse(builder);
+					eventBus.post(TextButtonResponse.createResponse(builder));  
 				}
-				return null;
+				
 			}
-			
-		};
+		}).start();
+
 		
 	}
 

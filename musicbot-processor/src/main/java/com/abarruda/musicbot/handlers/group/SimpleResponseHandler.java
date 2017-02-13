@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.time.ZonedDateTime;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
@@ -20,21 +19,23 @@ import org.telegram.telegrambots.api.objects.Message;
 import com.abarruda.musicbot.config.Config;
 import com.abarruda.musicbot.persistence.DatabaseFacade;
 import com.abarruda.musicbot.persistence.MongoDbFacade;
-import com.abarruda.musicbot.handlers.MessageHandler;
 import com.abarruda.musicbot.items.TermResponse;
-import com.abarruda.musicbot.processor.responder.responses.BotResponse;
 import com.abarruda.musicbot.processor.responder.responses.TextResponse;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.google.inject.Inject;
 
-public class SimpleResponseHandler implements MessageHandler {
+public class SimpleResponseHandler {
 	
 	private static final Logger logger = LogManager.getLogger(SimpleResponseHandler.class);
 	
 	private final static String RESPONSES_FILE = "responses.txt";
 	
+	private final EventBus eventBus;
 	private static Map<String, String> mapping;
 	private final DatabaseFacade db;
 	private Map<String, Map<String, String>> chatToTermResponseMapping = Maps.newConcurrentMap();
@@ -65,7 +66,9 @@ public class SimpleResponseHandler implements MessageHandler {
 		}
 	};
 	
-	public SimpleResponseHandler() {
+	@Inject
+	public SimpleResponseHandler(final EventBus eventBus) {
+		this.eventBus = eventBus;
 		mapping = loadResponsesFromFile();
 		db = MongoDbFacade.getMongoDb();
 		final ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("Term-Response-Maintainer-thread-%d").build();
@@ -98,12 +101,12 @@ public class SimpleResponseHandler implements MessageHandler {
 		return loadedResponses;
 	}
 	
-	@Override
-	public Callable<BotResponse> handleMessage(Message message) {
-		return new Callable<BotResponse>() {
-
+	@Subscribe
+	public void handleMessage(final Message message) {
+		new Thread(new Runnable() {
+			
 			@Override
-			public BotResponse call() throws Exception {
+			public void run() {
 				if (message.hasText()) {
 					final String chatId = message.getChatId().toString();
 					final Map<String, String> mappingForChat = chatToTermResponseMapping.get(chatId);
@@ -111,21 +114,19 @@ public class SimpleResponseHandler implements MessageHandler {
 					if (mappingForChat != null) {
 						for (final String term : mappingForChat.keySet()) {
 							if (message.getText().toLowerCase().contains(term.toLowerCase())) {
-								return TextResponse.createResponse(
+								eventBus.post(TextResponse.createResponse(
 										message.getChatId().toString(), 
 										mappingForChat.get(term), 
 										true,
-										false);
+										false));
 							}
 						}
 					}
 					
 				}
-				return null;
-			}
-		};
 				
+			}
+		}).start();
 	}
-	
 
 }

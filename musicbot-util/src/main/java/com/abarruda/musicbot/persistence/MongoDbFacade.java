@@ -26,6 +26,8 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
+import com.mongodb.MongoCredential;
+import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
@@ -52,7 +54,9 @@ public class MongoDbFacade implements DatabaseFacade {
 	private final MongoDatabase db;
 	
 	private MongoDbFacade(String address, String databaseName) {
-		mongoClient = new MongoClient(address);
+		final List<ServerAddress> seeds = Lists.newArrayList(new ServerAddress(address)); 
+		final List<MongoCredential> creds = Lists.newArrayList(MongoCredential.createMongoCRCredential("admin", "admin", "devmongo123".toCharArray()));
+		mongoClient = new MongoClient(seeds, creds);
 		db = mongoClient.getDatabase(databaseName);
 	}
 	

@@ -3,21 +3,21 @@ package com.abarruda.musicbot.handlers.direct;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Date;
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.telegram.telegrambots.api.objects.Message;
 
-import com.abarruda.musicbot.handlers.MessageHandler;
-import com.abarruda.musicbot.processor.responder.responses.BotResponse;
 import com.abarruda.musicbot.processor.responder.responses.ForceReplyTextResponse;
 import com.abarruda.musicbot.processor.responder.responses.TextResponse;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
+import com.google.inject.Inject;
 
-public class FeedbackHandler implements MessageHandler {
+public class FeedbackHandler {
 	
 	private static final Logger logger = LogManager.getLogger(FeedbackHandler.class);
 	
@@ -26,21 +26,25 @@ public class FeedbackHandler implements MessageHandler {
 	private static final String OUTPUT_FILE = "feedback_bugs.log";
 	private final static long USER_INTERACTION_TIMEOUT = 7L;
 	
+	private final EventBus eventBus;
 	private Cache<String, Boolean> cache;
 	
-	public FeedbackHandler() {
+	@Inject
+	public FeedbackHandler(final EventBus eventBus) {
+		this.eventBus = eventBus;
 		this.cache = CacheBuilder.newBuilder()
 				.maximumSize(1000)
 				.expireAfterAccess(USER_INTERACTION_TIMEOUT, TimeUnit.DAYS)
 				.build();
 	}
 	
-	@Override
-	public Callable<BotResponse> handleMessage(Message message) {
-		return new Callable<BotResponse>() {
-
+	@Subscribe
+	public void handleMessage(Message message) {
+		
+		new Thread(new Runnable() {
+			
 			@Override
-			public BotResponse call() throws Exception {
+			public void run() {
 				if (message.hasText()) {
 					
 					final String chatId = message.getChatId().toString();
@@ -48,11 +52,11 @@ public class FeedbackHandler implements MessageHandler {
 					
 					if (message.getText().equals(FEEDBACK_COMMAND) && cache.getIfPresent(userId) == null) {
 						cache.put(userId, true);
-						return ForceReplyTextResponse.createResponse(
+						eventBus.post(ForceReplyTextResponse.createResponse(
 								chatId, 
 								"What feedback would you like to give?", 
 								true,
-								false);
+								false));
 					} else if (cache.getIfPresent(userId) != null && cache.getIfPresent(userId)) {
 						final String userFirstName = message.getFrom().getFirstName();
 						final String userLastName = message.getFrom().getLastName();
@@ -70,22 +74,28 @@ public class FeedbackHandler implements MessageHandler {
 						feedback.append("'");
 						feedback.append("\n");
 						
-						final FileWriter file = new FileWriter(OUTPUT_FILE);
+						FileWriter file = null;
 						try {
+							file = new FileWriter(OUTPUT_FILE);
 							file.write(feedback.toString());
 						} catch (IOException e) {
 							logger.error("Cannot write to feedback log!", e);
 						} finally {
-							file.close();
+							try {
+								file.close();
+							} catch (IOException e) {
+								logger.error("Cannot close file!", e);
+							}
+							cache.invalidate(userId);
+							eventBus.post(TextResponse.createResponse(chatId, "Thank you for your feedback!", true, false));
 						}
-						cache.invalidate(userId);
-						return TextResponse.createResponse(chatId, "Thank you for your feedback!", true, false);
 					}
-
+				
 				}
-				return null;
 			}
-		};
+		}).start();
+
 	}
+		
 
 }

@@ -1,31 +1,38 @@
 package com.abarruda.musicbot.handlers.direct;
 
 import java.util.Map;
-import java.util.concurrent.Callable;
 
 import org.telegram.telegrambots.api.objects.Message;
 
 import com.abarruda.musicbot.handlers.CommandUtil;
-import com.abarruda.musicbot.handlers.MessageHandler;
 import com.abarruda.musicbot.handlers.CommandUtil.Command;
 import com.abarruda.musicbot.items.TermResponse;
 import com.abarruda.musicbot.persistence.DatabaseFacade;
 import com.abarruda.musicbot.persistence.MongoDbFacade;
-import com.abarruda.musicbot.processor.responder.responses.BotResponse;
 import com.abarruda.musicbot.processor.responder.responses.TextResponse;
 import com.google.common.base.Strings;
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
+import com.google.inject.Inject;
 
-public class StatsHandler implements MessageHandler {
+public class StatsHandler {
 	
 	private static final String COMMAND = "/stats";
 	private final DatabaseFacade db = MongoDbFacade.getMongoDb();
+	
+	private final EventBus eventBus;
+	
+	@Inject
+	public StatsHandler(final EventBus eventBus) {
+		this.eventBus = eventBus;
+	}
 
-	@Override
-	public Callable<BotResponse> handleMessage(Message message) {
-		return new Callable<BotResponse>() {
-
+	@Subscribe
+	public void handleMessage(Message message) {
+		new Thread(new Runnable() {
+			
 			@Override
-			public BotResponse call() throws Exception {
+			public void run() {
 				if (message.hasText()) {
 					final Command command = CommandUtil.getCommandFromMessage(message);
 					
@@ -53,17 +60,16 @@ public class StatsHandler implements MessageHandler {
 							responseString.append("No information to display");
 						}
 						
-						return TextResponse.createResponse(
+						eventBus.post(TextResponse.createResponse(
 								message.getChatId().toString(), 
 								responseString.toString(), 
 								false,
-								true);
+								true));
 					}
 				}
-				return null;
 			}
-			
-		};
+		}).start();
+		
 	}
 
 }

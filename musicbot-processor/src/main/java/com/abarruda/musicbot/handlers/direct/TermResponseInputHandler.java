@@ -1,7 +1,6 @@
 package com.abarruda.musicbot.handlers.direct;
 
 import java.util.Date;
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.LogManager;
@@ -10,21 +9,21 @@ import org.telegram.telegrambots.api.objects.CallbackQuery;
 import org.telegram.telegrambots.api.objects.Message;
 
 import com.abarruda.musicbot.ChatManager;
-import com.abarruda.musicbot.handlers.CallbackQueryHandler;
 import com.abarruda.musicbot.handlers.CallbackQueryUtil;
 import com.abarruda.musicbot.handlers.ChatListUtil;
-import com.abarruda.musicbot.handlers.MessageHandler;
 import com.abarruda.musicbot.handlers.CallbackQueryUtil.CallbackQueryInfo;
 import com.abarruda.musicbot.items.TermResponse;
 import com.abarruda.musicbot.persistence.DatabaseFacade;
 import com.abarruda.musicbot.persistence.MongoDbFacade;
-import com.abarruda.musicbot.processor.responder.responses.BotResponse;
 import com.abarruda.musicbot.processor.responder.responses.ForceReplyTextResponse;
 import com.abarruda.musicbot.processor.responder.responses.TextResponse;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
+import com.google.inject.Inject;
 
-public class TermResponseInputHandler implements MessageHandler, CallbackQueryHandler {
+public class TermResponseInputHandler {
 	
 	private static final Logger logger = LogManager.getLogger(TermResponseInputHandler.class);
 	
@@ -34,7 +33,8 @@ public class TermResponseInputHandler implements MessageHandler, CallbackQueryHa
 	private final static long USER_INTERACTION_TIMEOUT = 3L;
 	
 	private DatabaseFacade db;
-	private ChatManager chatManger;
+	private final EventBus eventBus;
+	private final ChatManager chatManger;
 	private Cache<Integer, AutoResponderInputState> cache;
 	
 	private static class AutoResponderInputState {
@@ -49,9 +49,11 @@ public class TermResponseInputHandler implements MessageHandler, CallbackQueryHa
 		
 	}
 	
-	public TermResponseInputHandler() {
+	@Inject
+	public TermResponseInputHandler(final EventBus eventBus, final ChatManager chatManager) {
 		this.db = MongoDbFacade.getMongoDb();
-		this.chatManger = ChatManager.getChatManager();
+		this.eventBus = eventBus;
+		this.chatManger = chatManager;
 		
 		this.cache = CacheBuilder.newBuilder()
 				.maximumSize(1000)
@@ -93,12 +95,13 @@ public class TermResponseInputHandler implements MessageHandler, CallbackQueryHa
 				false);
 	}
 	
-	@Override
-	public Callable<BotResponse> handleCallbackQuery(final CallbackQuery query) {
-		return new Callable<BotResponse>() {
-
+	@Subscribe
+	public void handleCallbackQuery(final CallbackQuery query) {
+		
+		new Thread(new Runnable() {
+			
 			@Override
-			public BotResponse call() throws Exception {
+			public void run() {
 				final CallbackQueryInfo queryInfo = CallbackQueryUtil.getInfo(query);
 				if (queryInfo.source.equals(TermResponseInputHandler.class.getSimpleName())) {
 					
@@ -107,7 +110,7 @@ public class TermResponseInputHandler implements MessageHandler, CallbackQueryHa
 					final String chatIdFromButton = queryInfo.data;
 					
 					if (!chatManger.getChatsForUserFromCache(userId).values().contains(chatIdFromButton)) {
-						return getInactiveTextResponse(directChatId);
+						eventBus.post(getInactiveTextResponse(directChatId));
 					}
 					
 					final String chatIdForAutoResponder = queryInfo.data;
@@ -115,11 +118,11 @@ public class TermResponseInputHandler implements MessageHandler, CallbackQueryHa
 					// check if they already have made their allotment
 					for (final TermResponse tr : db.getTermResponses(chatIdForAutoResponder)) {
 						if (tr.userId == userId) {
-							return TextResponse.createResponse(
+							eventBus.post(TextResponse.createResponse(
 									directChatId, 
 									"Sorry, you have already made a submission, now fuck off and wait a week!", 
 									false,
-									false);
+									false));
 						}
 					}
 					
@@ -127,36 +130,33 @@ public class TermResponseInputHandler implements MessageHandler, CallbackQueryHa
 					state.chatId = chatIdForAutoResponder;
 					cache.put(userId, state);
 					
-					return ForceReplyTextResponse.createResponse(
+					eventBus.post(ForceReplyTextResponse.createResponse(
 							directChatId,
 							"What term do you want to look for?",
 							false, 
-							false);
+							false));
 				}
-				return null;
-				
 			}
-			
-		};
+		}).start();
 		
 	}
 
-	@Override
-	public Callable<BotResponse> handleMessage(Message message) {
-		return new Callable<BotResponse>() {
-
+	@Subscribe
+	public void handleMessage(Message message) {
+		
+		new Thread(new Runnable() {
+			
 			@Override
-			public BotResponse call() throws Exception {
-				
+			public void run() {
 				if (message.hasText()) {
 					final int userId = message.getFrom().getId();
 					final String directMessageChatId = message.getChatId().toString();
 					
 					if (message.getText().equals(AUTO_RESPONDER_COMMAND)) {
 						
-						return ChatListUtil.getChatListForUser(directMessageChatId, userId, 
+						eventBus.post(ChatListUtil.getChatListForUser(directMessageChatId, userId, 
 								"Which chat would you like to apply the Auto Responder to?",
-								TermResponseInputHandler.class.getSimpleName());
+								TermResponseInputHandler.class.getSimpleName()));
 						
 					} else if (cache.getIfPresent(userId) != null) {
 						
@@ -173,11 +173,11 @@ public class TermResponseInputHandler implements MessageHandler, CallbackQueryHa
 							responseText.append(termFromUser);
 							responseText.append("' is seen?");
 							
-							return ForceReplyTextResponse.createResponse(
+							eventBus.post(ForceReplyTextResponse.createResponse(
 									directMessageChatId, 
 									responseText.toString(),
 									false, 
-									false);
+									false));
 							
 						} else if (!state.isComplete() && state.term != null && state.response == null) {
 							String responseFromUser = message.getText();
@@ -189,11 +189,11 @@ public class TermResponseInputHandler implements MessageHandler, CallbackQueryHa
 							
 							db.insertTermResponse(state.chatId, autoResponse);
 							cache.invalidate(userId);
-							return TextResponse.createResponse(
+							eventBus.post(TextResponse.createResponse(
 									directMessageChatId, 
 									"Successfully created!  Wait a minute for the response to become active.", 
 									false,
-									false);
+									false));
 							
 						} else {
 							logger.error("Unexpected state for AutoResponder input!");
@@ -204,10 +204,9 @@ public class TermResponseInputHandler implements MessageHandler, CallbackQueryHa
 						//return TextResponse.createSessionExpiredResponse(chatId);
 					}
 				}
-				return null;
 			}
-			
-		};
+		}).start();
+		
 	}
 
 }
