@@ -4,6 +4,7 @@ import com.abarruda.musicbot.BotServer;
 import com.abarruda.musicbot.ChatManager;
 import com.abarruda.musicbot.MessageManager;
 import com.abarruda.musicbot.config.Configuration;
+import com.abarruda.musicbot.config.ConfigurationModule;
 import com.abarruda.musicbot.config.ConfigurationProvider;
 import com.abarruda.musicbot.handlers.direct.BrowseSetsHandler;
 import com.abarruda.musicbot.handlers.direct.FeedbackHandler;
@@ -30,8 +31,7 @@ public class BotModule extends AbstractModule {
 
 	@Override
 	protected void configure() {
-		bindConstant().annotatedWith(ConfigurationProvider.PropsFileLoc.class).to(this.configFileLocation);
-		bind(Configuration.class).toProvider(ConfigurationProvider.class).in(Scopes.SINGLETON);
+		install(new ConfigurationModule(configFileLocation));
 		
 		bind(BotServer.class).in(Scopes.SINGLETON);
 		bind(EventBus.class).in(Scopes.SINGLETON);
