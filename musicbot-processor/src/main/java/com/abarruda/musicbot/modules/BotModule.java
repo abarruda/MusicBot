@@ -49,7 +49,7 @@ public class BotModule extends AbstractModule {
 		
 		install(new FactoryModuleBuilder()
 				.implement(ItemValidator.class, ItemValidator.class)
-				.build(ItemValidator.class));
+				.build(ItemValidator.Factory.class));
 		
 		// Handlers
 		bind(ChatManagerHandler.class);

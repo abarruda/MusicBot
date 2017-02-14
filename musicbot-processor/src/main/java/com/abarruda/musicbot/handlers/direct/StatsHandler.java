@@ -7,6 +7,7 @@ import org.telegram.telegrambots.api.objects.Message;
 import com.abarruda.musicbot.handlers.CommandUtil;
 import com.abarruda.musicbot.handlers.CommandUtil.Command;
 import com.abarruda.musicbot.items.TermResponse;
+import com.abarruda.musicbot.message.TelegramMessage;
 import com.abarruda.musicbot.persistence.DatabaseFacade;
 import com.abarruda.musicbot.processor.responder.responses.TextResponse;
 import com.google.common.base.Strings;
@@ -28,7 +29,9 @@ public class StatsHandler {
 	}
 
 	@Subscribe
-	public void handleMessage(Message message) {
+	public void handleMessage(TelegramMessage.PrivateMessage privateMessage) {
+		final Message message = privateMessage.getMessage();
+		
 		new Thread(new Runnable() {
 			
 			@Override

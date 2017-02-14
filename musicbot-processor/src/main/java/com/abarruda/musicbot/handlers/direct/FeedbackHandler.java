@@ -9,6 +9,7 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.telegram.telegrambots.api.objects.Message;
 
+import com.abarruda.musicbot.message.TelegramMessage;
 import com.abarruda.musicbot.processor.responder.responses.ForceReplyTextResponse;
 import com.abarruda.musicbot.processor.responder.responses.TextResponse;
 import com.google.common.cache.Cache;
@@ -39,7 +40,8 @@ public class FeedbackHandler {
 	}
 	
 	@Subscribe
-	public void handleMessage(Message message) {
+	public void handleMessage(TelegramMessage.PrivateMessage privateMessage) {
+		final Message message = privateMessage.getMessage();
 		
 		new Thread(new Runnable() {
 			

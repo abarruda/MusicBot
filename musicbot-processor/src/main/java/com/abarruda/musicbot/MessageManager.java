@@ -1,9 +1,11 @@
 package com.abarruda.musicbot;
 
+import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.Update;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 
 import com.abarruda.musicbot.config.Configuration;
+import com.abarruda.musicbot.message.TelegramMessage;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 
@@ -24,12 +26,18 @@ public class MessageManager extends TelegramLongPollingBot {
 
 	@Override
 	public void onUpdateReceived(final Update update) {
-		
+
 		if (update.hasMessage()) {
-			eventBus.post(update.getMessage());
-		}
-		
-		if (update.hasCallbackQuery()) {
+			final Message message = update.getMessage();
+			
+			if (message.isGroupMessage()) {
+				eventBus.post(new TelegramMessage.GroupMessage(message));
+			} else if (message.isUserMessage()) {
+				eventBus.post(new TelegramMessage.PrivateMessage(message));
+			} else {
+				//TODO: throw exception and log
+			}
+		} else if (update.hasCallbackQuery()) {
 			eventBus.post(update.getCallbackQuery());
 		}
 			

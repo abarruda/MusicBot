@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 import org.telegram.telegrambots.api.objects.Message;
 
 import com.abarruda.musicbot.config.Configuration;
+import com.abarruda.musicbot.message.TelegramMessage;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -112,7 +113,8 @@ public class LoggingHandler {
 	}
 
 	@Subscribe
-	public void handleMessage(Message message) {
+	public void handleMessage(final TelegramMessage.GroupMessage groupMessage) {
+		final Message message = groupMessage.getMessage();
 		
 		new Thread(new Runnable() {
 			@Override

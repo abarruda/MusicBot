@@ -10,6 +10,7 @@ import com.abarruda.musicbot.config.Configuration;
 import com.abarruda.musicbot.handlers.CallbackQueryUtil;
 import com.abarruda.musicbot.handlers.CallbackQueryUtil.CallbackQueryInfo;
 import com.abarruda.musicbot.handlers.ChatListUtil;
+import com.abarruda.musicbot.message.TelegramMessage;
 import com.abarruda.musicbot.processor.responder.responses.InlineButtonResponse;
 import com.abarruda.musicbot.processor.responder.responses.InlineButtonResponse.InlineButtonResponseBuilder;
 import com.google.common.eventbus.EventBus;
@@ -34,7 +35,8 @@ public class BrowseSetsHandler {
 	}
 
 	@Subscribe
-	public void handleMessage(final Message message) {
+	public void handleMessage(final TelegramMessage.PrivateMessage privateMessage) {
+		final Message message = privateMessage.getMessage();
 		if (message.hasText() && message.getText().equals(COMMAND_BROWSE_MUSIC)) {
 			final int userId = message.getFrom().getId();
 			final String directMessageChatId = message.getChatId().toString();
@@ -59,7 +61,7 @@ public class BrowseSetsHandler {
 			description.append("\n");
 			description.append("`Pro Tip:` \n");
 			description.append("iOS devices: Once the webpage loads, open in Safari and click the 'share' button, " +
-			"then select 'Add to Home Screen' button to install your customized app for quick reference!");
+			"then select 'Add to Home Screen' button to install your customized app for quick reference.");
 			
 			final InlineButtonResponseBuilder builder = new InlineButtonResponseBuilder()
 					.setChatId(directChatId)
@@ -68,7 +70,7 @@ public class BrowseSetsHandler {
 			
 			final String url = String.format(this.configuration.getConfig(Configuration.WEBSITE) + "?chatId=%s&userId=%s", chatIdFromButton, userId);
 			
-			builder.addButtonRow(InlineButtonResponseBuilder.newButtonWithUrl("Browse Music", url));
+			builder.addButtonRow(InlineButtonResponseBuilder.newButtonWithUrl("Click here to browse music", url));
 			
 			logger.info("User '" + userId + "' (" + query.getFrom().getFirstName() + " " + query.getFrom().getLastName() + 
 					") requested to browse music in chat '" + chatIdFromButton + "'");

@@ -19,6 +19,7 @@ import org.telegram.telegrambots.api.objects.Message;
 import com.abarruda.musicbot.config.Configuration;
 import com.abarruda.musicbot.persistence.DatabaseFacade;
 import com.abarruda.musicbot.items.TermResponse;
+import com.abarruda.musicbot.message.TelegramMessage;
 import com.abarruda.musicbot.processor.responder.responses.TextResponse;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
@@ -103,7 +104,9 @@ public class SimpleResponseHandler {
 	}
 	
 	@Subscribe
-	public void handleMessage(final Message message) {
+	public void handleMessage(final TelegramMessage.GroupMessage groupMessage) {
+		final Message message = groupMessage.getMessage();
+		
 		new Thread(new Runnable() {
 			
 			@Override

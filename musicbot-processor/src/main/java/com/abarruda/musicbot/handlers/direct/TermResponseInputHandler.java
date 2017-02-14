@@ -13,6 +13,7 @@ import com.abarruda.musicbot.handlers.CallbackQueryUtil;
 import com.abarruda.musicbot.handlers.ChatListUtil;
 import com.abarruda.musicbot.handlers.CallbackQueryUtil.CallbackQueryInfo;
 import com.abarruda.musicbot.items.TermResponse;
+import com.abarruda.musicbot.message.TelegramMessage;
 import com.abarruda.musicbot.persistence.DatabaseFacade;
 import com.abarruda.musicbot.processor.responder.responses.ForceReplyTextResponse;
 import com.abarruda.musicbot.processor.responder.responses.TextResponse;
@@ -144,7 +145,8 @@ public class TermResponseInputHandler {
 	}
 
 	@Subscribe
-	public void handleMessage(Message message) {
+	public void handleMessage(TelegramMessage.PrivateMessage privateMessage) {
+		final Message message = privateMessage.getMessage();
 		
 		new Thread(new Runnable() {
 			

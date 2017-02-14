@@ -4,6 +4,7 @@ import org.telegram.telegrambots.api.objects.Message;
 
 import com.abarruda.musicbot.handlers.CommandUtil;
 import com.abarruda.musicbot.handlers.CommandUtil.Command;
+import com.abarruda.musicbot.message.TelegramMessage;
 import com.abarruda.musicbot.processor.responder.responses.TextButtonResponse;
 import com.abarruda.musicbot.processor.responder.responses.TextButtonResponse.TextButtonResponseBuilder;
 import com.google.common.base.Predicate;
@@ -49,7 +50,8 @@ public class HelpMessageHandler {
 	}
 	
 	@Subscribe
-	public void handleMessage(final Message message) {
+	public void handleMessage(final TelegramMessage.PrivateMessage privateMessage) {
+		final Message message = privateMessage.getMessage();
 		
 		new Thread(new Runnable() {
 			
