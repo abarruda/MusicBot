@@ -8,10 +8,11 @@ import org.apache.log4j.Logger;
 import com.abarruda.musicbot.items.ContentType;
 import com.abarruda.musicbot.items.RemoteContent;
 import com.abarruda.musicbot.persistence.DatabaseFacade;
-import com.abarruda.musicbot.persistence.MongoDbFacade;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 
 /**
  * This class represents a process to iterate over RemoteContent
@@ -19,19 +20,28 @@ import com.google.common.collect.Iterables;
  */
 public class ItemValidator implements Runnable {
 	
+	public interface Factory {
+		public ItemValidator create(
+				@Assisted final Predicate<RemoteContent> filterPredicate, 
+				@Assisted final Function<RemoteContent, RemoteContent> function);
+	}
+	
 	private static final Logger logger = LogManager.getLogger(ItemValidator.class);
 
 	private final DatabaseFacade db;
 	private final Predicate<RemoteContent> filterPredicate;
 	private final Function<RemoteContent, RemoteContent> function;
 	
-	private ItemValidator(final Predicate<RemoteContent> filterPredicate, Function<RemoteContent, RemoteContent> function) {
-		this.db = MongoDbFacade.getMongoDb();
+	@Inject
+	private ItemValidator(final DatabaseFacade db, 
+			@Assisted final Predicate<RemoteContent> filterPredicate, 
+			@Assisted final Function<RemoteContent, RemoteContent> function) {
+		this.db = db;
 		this.filterPredicate = filterPredicate;
 		this.function = function;
 	}
 	
-	public static void updateUnknownTypesToKnownTypes() {
+	public static void updateUnknownTypesToKnownTypes(final Factory factory) {
 		final Predicate<RemoteContent> predicate = new Predicate<RemoteContent>() {
 			
 			@Override
@@ -51,7 +61,7 @@ public class ItemValidator implements Runnable {
 			}
 		};
 		
-		final ItemValidator validator = new ItemValidator(predicate, function);
+		final ItemValidator validator = factory.create(predicate, function);
 		new Thread(validator).start();
 	}
 	
@@ -69,7 +79,7 @@ public class ItemValidator implements Runnable {
 			}
 			logger.info("Validation complete.");
 		} catch (final Exception e) {
-			logger.error("Can not run validator!", e);
+			logger.error("Cannot run validator!", e);
 		}
 		
 	}

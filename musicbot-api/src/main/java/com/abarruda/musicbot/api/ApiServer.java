@@ -5,25 +5,36 @@ import javax.ws.rs.core.Response;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
-import com.abarruda.musicbot.config.Config;
+import com.abarruda.musicbot.config.Configuration;
+import com.google.inject.Guice;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.assistedinject.Assisted;
 
 import io.github.mikexliu.stack.server.StackServer;
 
 
 public class ApiServer {
 	
+	public interface Factory {
+		public ApiServer create(final ApiModule apiModule);
+	}
+	
 	private static final Logger logger = LogManager.getLogger(ApiServer.class);
 	
 	private StackServer server;
 	
-	private ApiServer() {
+	@Inject
+	private ApiServer(
+			final Configuration configuration,
+			@Assisted ApiModule apiModule) {
 		
-		int port = Integer.valueOf(Config.getConfig(Config.API_PORT));
+		int port = Integer.valueOf(configuration.getConfig(Configuration.API_PORT));
 		server = null;
 		
 		try {
 			server = StackServer.builder()
-				.withTitle("MusicBoy API")
+				.withTitle("MusicBot API")
 				.withDescription("server-example description")
 				.withApiPackageName("com.abarruda.musicbot.api")
 	            .withVersion("0.0.1-SNAPSHOT")
@@ -34,12 +45,12 @@ public class ApiServer {
 	                            .build())
 	            .withPort(port)
 	            .withCorsEnabled()
+	            .withModule(apiModule)
 				.build();
 		} catch (Exception e) {
-			logger.fatal("Cannot start stack server!");
+			logger.fatal("Cannot start stack server!", e);
 			System.exit(1);
-		}
-		
+		}	
 	}
 	
 	public void start() throws Exception {
@@ -49,15 +60,14 @@ public class ApiServer {
 	}
 	
 	public static void main(String[] args) {
-		Config.initializeConfigs(args[0]);
-		
-		final ApiServer server = new ApiServer();
+		final ApiModule apiModule = new ApiModule(args[0]);
+		final Injector injector = Guice.createInjector(apiModule);
+		final ApiServer.Factory factory = injector.getInstance(ApiServer.Factory.class);
 		try {
-			server.start();
+			factory.create(apiModule).start();
 		} catch (Exception e) {
 			logger.fatal("Cannot start API server!", e);
 		}
-		
 	}
 
 }

@@ -13,7 +13,6 @@ import org.apache.log4j.Logger;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
-import com.abarruda.musicbot.config.Config;
 import com.abarruda.musicbot.config.Configuration;
 import com.abarruda.musicbot.items.ContentType;
 import com.abarruda.musicbot.items.DetectedContent;
@@ -64,22 +63,6 @@ public class MongoDbFacade implements DatabaseFacade {
 		final List<MongoCredential> creds = Lists.newArrayList(MongoCredential.createMongoCRCredential("admin", "admin", "devmongo123".toCharArray()));
 		mongoClient = new MongoClient(seeds, creds);
 		db = mongoClient.getDatabase(databaseName);
-	}
-	
-	private MongoDbFacade(String address, String databaseName) {
-		final List<ServerAddress> seeds = Lists.newArrayList(new ServerAddress(address)); 
-		final List<MongoCredential> creds = Lists.newArrayList(MongoCredential.createMongoCRCredential("admin", "admin", "devmongo123".toCharArray()));
-		mongoClient = new MongoClient(seeds, creds);
-		db = mongoClient.getDatabase(databaseName);
-	}
-	
-	private static MongoDbFacade singleton;
-	
-	public static MongoDbFacade getMongoDb() {
-		if (singleton == null) {
-			singleton = new MongoDbFacade(Config.getConfig(Config.DATABASE_ADDRESS), Config.getConfig(Config.DATABASE_NAME));
-		}
-		return singleton;
 	}
 	
 	private MongoCollection<Document> getChatMemberCollection(String chatId) {

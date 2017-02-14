@@ -14,6 +14,7 @@ import com.abarruda.musicbot.handlers.group.LoggingHandler;
 import com.abarruda.musicbot.handlers.group.SimpleResponseHandler;
 import com.abarruda.musicbot.handlers.group.content.RemoteContentHandler;
 import com.abarruda.musicbot.persistence.DatabaseModule;
+import com.abarruda.musicbot.processor.item.ItemValidator;
 import com.abarruda.musicbot.processor.metadata.MetadataScraper;
 import com.abarruda.musicbot.processor.metadata.MusicSetMetadataProcessor;
 import com.abarruda.musicbot.processor.responder.Responder;
@@ -45,6 +46,10 @@ public class BotModule extends AbstractModule {
 		install(new FactoryModuleBuilder()
 				.implement(MetadataScraper.class, MetadataScraper.class)
 				.build(MetadataScraper.Factory.class));
+		
+		install(new FactoryModuleBuilder()
+				.implement(ItemValidator.class, ItemValidator.class)
+				.build(ItemValidator.class));
 		
 		// Handlers
 		bind(ChatManagerHandler.class);

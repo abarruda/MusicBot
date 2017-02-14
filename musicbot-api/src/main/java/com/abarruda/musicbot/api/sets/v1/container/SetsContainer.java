@@ -14,7 +14,6 @@ import com.abarruda.musicbot.api.sets.v1.resource.SetsResource;
 import com.abarruda.musicbot.items.MusicSet;
 import com.abarruda.musicbot.items.ContentType;
 import com.abarruda.musicbot.persistence.DatabaseFacade;
-import com.abarruda.musicbot.persistence.MongoDbFacade;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableSet;
@@ -22,14 +21,16 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
 import com.google.common.primitives.Ints;
+import com.google.inject.Inject;
 
 public class SetsContainer extends SetsResource {
 	private static final Logger logger = LogManager.getLogger(SetsContainer.class);
 	
 	final DatabaseFacade db;
 	
-	public SetsContainer() {
-		db = MongoDbFacade.getMongoDb();
+	@Inject
+	public SetsContainer(final DatabaseFacade db) {
+		this.db = db;
 	}
 	
 	private static ImmutableSet<String> setUrls = ImmutableSet.copyOf(
