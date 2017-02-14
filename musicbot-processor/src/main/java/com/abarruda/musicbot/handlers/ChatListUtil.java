@@ -18,9 +18,7 @@ public class ChatListUtil {
 				false);
 	}
 	
-	public static BotResponse getChatListForUser(final String responseChatId, final int userId, final String description, final String source) {
-		final ChatManager chatManager = ChatManager.getChatManager();
-		
+	public static BotResponse getChatListForUser(final ChatManager chatManager, final String responseChatId, final int userId, final String description, final String source) {
 		final Map<String, String> chatsForUser = chatManager.getChatsForUserFromCache(userId);
 		if (chatsForUser.isEmpty()) {
 			return getInactiveTextResponse(responseChatId);

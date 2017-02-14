@@ -14,11 +14,13 @@ import com.abarruda.musicbot.handlers.group.LoggingHandler;
 import com.abarruda.musicbot.handlers.group.SimpleResponseHandler;
 import com.abarruda.musicbot.handlers.group.content.RemoteContentHandler;
 import com.abarruda.musicbot.persistence.DatabaseModule;
+import com.abarruda.musicbot.processor.metadata.MetadataScraper;
 import com.abarruda.musicbot.processor.metadata.MusicSetMetadataProcessor;
 import com.abarruda.musicbot.processor.responder.Responder;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.AbstractModule;
 import com.google.inject.Scopes;
+import com.google.inject.assistedinject.FactoryModuleBuilder;
 
 public class BotModule extends AbstractModule {
 	
@@ -39,6 +41,10 @@ public class BotModule extends AbstractModule {
 		bind(Responder.class).in(Scopes.SINGLETON);
 		bind(ChatManager.class).in(Scopes.SINGLETON);
 		bind(MusicSetMetadataProcessor.class).in(Scopes.SINGLETON);
+		
+		install(new FactoryModuleBuilder()
+				.implement(MetadataScraper.class, MetadataScraper.class)
+				.build(MetadataScraper.Factory.class));
 		
 		// Handlers
 		bind(ChatManagerHandler.class);

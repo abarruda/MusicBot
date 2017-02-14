@@ -5,7 +5,6 @@ import org.apache.log4j.Logger;
 import org.telegram.telegrambots.TelegramBotsApi;
 import org.telegram.telegrambots.logging.BotLogger;
 
-import com.abarruda.musicbot.config.Config;
 import com.abarruda.musicbot.handlers.direct.BrowseSetsHandler;
 import com.abarruda.musicbot.handlers.direct.FeedbackHandler;
 import com.abarruda.musicbot.handlers.direct.HelpMessageHandler;
@@ -113,7 +112,7 @@ public class BotServer {
 	public static void main(String[] args) {
 		logger.info("Bot starting.");
 		BotLogger.setLevel(java.util.logging.Level.FINEST);
-		Config.initializeConfigs(args[0]);
+		//Config.initializeConfigs(args[0]);
 		
 		final Injector injector = Guice.createInjector(new BotModule(args[0]));
 		final BotServer server = injector.getInstance(BotServer.class);

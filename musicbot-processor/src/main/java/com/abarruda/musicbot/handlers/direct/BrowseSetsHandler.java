@@ -5,7 +5,8 @@ import org.apache.log4j.Logger;
 import org.telegram.telegrambots.api.objects.CallbackQuery;
 import org.telegram.telegrambots.api.objects.Message;
 
-import com.abarruda.musicbot.config.Config;
+import com.abarruda.musicbot.ChatManager;
+import com.abarruda.musicbot.config.Configuration;
 import com.abarruda.musicbot.handlers.CallbackQueryUtil;
 import com.abarruda.musicbot.handlers.CallbackQueryUtil.CallbackQueryInfo;
 import com.abarruda.musicbot.handlers.ChatListUtil;
@@ -22,10 +23,14 @@ public class BrowseSetsHandler {
 	public static final String COMMAND_BROWSE_MUSIC = "Browse Music";
 	
 	private final EventBus eventBus;
+	private final ChatManager chatManager;
+	private final Configuration configuration;
 	
 	@Inject
-	public BrowseSetsHandler(final EventBus eventBus) {
+	public BrowseSetsHandler(final EventBus eventBus, final ChatManager chatManager, final Configuration configuration) {
 		this.eventBus = eventBus;
+		this.chatManager = chatManager;
+		this.configuration = configuration;
 	}
 
 	@Subscribe
@@ -33,7 +38,7 @@ public class BrowseSetsHandler {
 		if (message.hasText() && message.getText().equals(COMMAND_BROWSE_MUSIC)) {
 			final int userId = message.getFrom().getId();
 			final String directMessageChatId = message.getChatId().toString();
-			eventBus.post(ChatListUtil.getChatListForUser(directMessageChatId, userId, 
+			eventBus.post(ChatListUtil.getChatListForUser(chatManager, directMessageChatId, userId, 
 					"Select the chat you want to browse:",
 					BrowseSetsHandler.class.getSimpleName()));
 		}
@@ -61,7 +66,7 @@ public class BrowseSetsHandler {
 					.setSilent(false)
 					.setText(description.toString());
 			
-			final String url = String.format(Config.getConfig(Config.WEBSITE) + "?chatId=%s&userId=%s", chatIdFromButton, userId);
+			final String url = String.format(this.configuration.getConfig(Configuration.WEBSITE) + "?chatId=%s&userId=%s", chatIdFromButton, userId);
 			
 			builder.addButtonRow(InlineButtonResponseBuilder.newButtonWithUrl("Browse Music", url));
 			

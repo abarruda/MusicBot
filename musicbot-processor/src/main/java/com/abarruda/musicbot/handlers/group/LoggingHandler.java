@@ -12,7 +12,7 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.telegram.telegrambots.api.objects.Message;
 
-import com.abarruda.musicbot.config.Config;
+import com.abarruda.musicbot.config.Configuration;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -20,18 +20,19 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 import com.google.common.eventbus.Subscribe;
+import com.google.inject.Inject;
 
 public class LoggingHandler {
 	private static final Logger logger = LogManager.getLogger(LoggingHandler.class);
 	
-	private static final String LOG_FILE_DIR = Config.getConfig(Config.LOGGING_FILE_LOCATION);
+	private final String logFileDirectory;
 	
 	private LoadingCache<String, FileWriter> logFileCache;
 	
-	private static CacheLoader<String, FileWriter> logFileCacheLoader = new CacheLoader<String, FileWriter>() {
+	private CacheLoader<String, FileWriter> logFileCacheLoader = new CacheLoader<String, FileWriter>() {
 		@Override
 		public FileWriter load(String chatId) throws Exception {
-			final File logFileDir = new File(LOG_FILE_DIR);
+			final File logFileDir = new File(logFileDirectory);
 			
 			if (!logFileDir.exists() || logFileDir.mkdirs()) {
 				throw new IllegalStateException("Cannot find or create logging directory!");
@@ -47,7 +48,7 @@ public class LoggingHandler {
 			
 			final File logFile;
 			if (logFiles.length == 0) {
-				final File newFile = new File(LOG_FILE_DIR + File.separator + chatId);
+				final File newFile = new File(logFileDir + File.separator + chatId);
 				newFile.createNewFile();
 				logFile = newFile;
 			} else if (logFiles.length == 1) {
@@ -73,7 +74,9 @@ public class LoggingHandler {
 		}
 	};
 	
-	public LoggingHandler() {
+	@Inject
+	public LoggingHandler(final Configuration configuration) {		
+		this.logFileDirectory = configuration.getConfig(Configuration.LOGGING_FILE_LOCATION);
 		
 		logFileCache = CacheBuilder.newBuilder()
 				.maximumSize(100)

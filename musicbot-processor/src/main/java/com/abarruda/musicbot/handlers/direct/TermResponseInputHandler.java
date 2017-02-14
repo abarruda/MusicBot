@@ -33,7 +33,7 @@ public class TermResponseInputHandler {
 	
 	private DatabaseFacade db;
 	private final EventBus eventBus;
-	private final ChatManager chatManger;
+	private final ChatManager chatManager;
 	private Cache<Integer, AutoResponderInputState> cache;
 	
 	private static class AutoResponderInputState {
@@ -55,7 +55,7 @@ public class TermResponseInputHandler {
 			final ChatManager chatManager) {
 		this.db = db;
 		this.eventBus = eventBus;
-		this.chatManger = chatManager;
+		this.chatManager = chatManager;
 		
 		this.cache = CacheBuilder.newBuilder()
 				.maximumSize(1000)
@@ -111,7 +111,7 @@ public class TermResponseInputHandler {
 					final String directChatId = query.getMessage().getChatId().toString();
 					final String chatIdFromButton = queryInfo.data;
 					
-					if (!chatManger.getChatsForUserFromCache(userId).values().contains(chatIdFromButton)) {
+					if (!chatManager.getChatsForUserFromCache(userId).values().contains(chatIdFromButton)) {
 						eventBus.post(getInactiveTextResponse(directChatId));
 					}
 					
@@ -156,7 +156,7 @@ public class TermResponseInputHandler {
 					
 					if (message.getText().equals(AUTO_RESPONDER_COMMAND)) {
 						
-						eventBus.post(ChatListUtil.getChatListForUser(directMessageChatId, userId, 
+						eventBus.post(ChatListUtil.getChatListForUser(chatManager, directMessageChatId, userId, 
 								"Which chat would you like to apply the Auto Responder to?",
 								TermResponseInputHandler.class.getSimpleName()));
 						

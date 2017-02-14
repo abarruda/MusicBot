@@ -16,7 +16,7 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.telegram.telegrambots.api.objects.Message;
 
-import com.abarruda.musicbot.config.Config;
+import com.abarruda.musicbot.config.Configuration;
 import com.abarruda.musicbot.persistence.DatabaseFacade;
 import com.abarruda.musicbot.items.TermResponse;
 import com.abarruda.musicbot.processor.responder.responses.TextResponse;
@@ -34,6 +34,7 @@ public class SimpleResponseHandler {
 	
 	private final static String RESPONSES_FILE = "responses.txt";
 	
+	private final Configuration configuration;
 	private final EventBus eventBus;
 	private static Map<String, String> mapping;
 	private final DatabaseFacade db;
@@ -50,7 +51,7 @@ public class SimpleResponseHandler {
 				
 				for(final TermResponse tr : db.getTermResponses(chatId)) {
 					final ZonedDateTime dateOfTermExpiry = ZonedDateTime.now().plusDays(
-							0-Integer.parseInt(Config.getConfig(Config.AUTORESPONSE_DURATION)));
+							0-Integer.parseInt(configuration.getConfig(Configuration.AUTORESPONSE_DURATION)));
 					if (tr.date.toInstant().isAfter(dateOfTermExpiry.toInstant())) {
 						updatedMapping.put(tr.term, tr.response);
 					} else {
@@ -66,7 +67,8 @@ public class SimpleResponseHandler {
 	};
 	
 	@Inject
-	public SimpleResponseHandler(final EventBus eventBus, final DatabaseFacade db) {
+	public SimpleResponseHandler(final Configuration configuration, final EventBus eventBus, final DatabaseFacade db) {
+		this.configuration = configuration;
 		this.eventBus = eventBus;
 		mapping = loadResponsesFromFile();
 		this.db = db;

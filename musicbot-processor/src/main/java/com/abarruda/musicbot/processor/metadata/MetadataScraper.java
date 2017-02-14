@@ -17,10 +17,18 @@ import org.jsoup.select.Elements;
 import com.abarruda.musicbot.items.MusicSet;
 import com.abarruda.musicbot.items.MusicSet.Metadata;
 import com.abarruda.musicbot.persistence.DatabaseFacade;
-import com.abarruda.musicbot.persistence.MongoDbFacade;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 
 public class MetadataScraper implements Runnable {
+	
+	public interface Factory {
+		public MetadataScraper create(
+				final boolean allSets, 
+				@Assisted("threadPoolSize") final int threadPoolSize, 
+				@Assisted("delaySeconds") final int delaySeconds);
+	}
 	
 	private static final Logger logger = LogManager.getLogger(MetadataScraper.class);
 	
@@ -29,11 +37,14 @@ public class MetadataScraper implements Runnable {
 	private DatabaseFacade db;
 	private ExecutorService executor;
 	
-	
-	private MetadataScraper(final boolean allSets, final int threadPoolSize, final int delaySeconds) {
+	@Inject
+	public MetadataScraper(final DatabaseFacade db,
+			@Assisted final boolean allSets,
+			@Assisted("threadPoolSize") final int threadPoolSize,
+			@Assisted("delaySeconds") final int delaySeconds) {
+		this.db = db;
 		this.allSets = allSets;
 		this.delaySeconds = delaySeconds;
-		this.db = MongoDbFacade.getMongoDb();
 		
 		final String type = allSets ? "AllSets" : "NewSets";
 		final ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("MusicSet-Metadata-" + type + "-thread-%d").build();
@@ -74,12 +85,12 @@ public class MetadataScraper implements Runnable {
 		private int sleepSeconds;
 		private DatabaseFacade db;
 		
-		private MetadataScraperWorker(final boolean allSets, final String chatId, 
+		private MetadataScraperWorker(final DatabaseFacade db, final boolean allSets, final String chatId, 
 				final MusicSet set, final int sleepSeconds) {
+			this.db = db;
 			this.allSets = allSets;
 			this.chatId = chatId;
 			this.set = set;
-			this.db = MongoDbFacade.getMongoDb();
 		}
 
 		@Override
@@ -123,21 +134,12 @@ public class MetadataScraper implements Runnable {
 			final Map<MusicSet, String> allSets = db.getMusicSets();
 			for (Entry<MusicSet, String> entry : allSets.entrySet()) {
 				executor.submit(
-						new MetadataScraperWorker(this.allSets, entry.getValue(), entry.getKey(),  delaySeconds));
+						new MetadataScraperWorker(this.db, this.allSets, entry.getValue(), entry.getKey(),  delaySeconds));
 			}
 		} catch (final Exception e) {
 			logger.fatal("Cannot run metadata processor!", e);
 		}
 		
 	}
-	
-	public static MetadataScraper doAllSets() {
-		return new MetadataScraper(true, 2, 2);
-	}
-	
-	public static MetadataScraper doOnlyNewSets() {
-		return new MetadataScraper(false, 5, 0);
-	}
-	
 
 }
