@@ -6,7 +6,6 @@ import moment from 'moment';
 import $ from 'jquery';
 import {Alert} from 'react-bootstrap';
 import {Button} from 'react-bootstrap';
-import {Carousel} from 'react-bootstrap';
 import {Grid, Row} from 'react-bootstrap';
 import {Nav, Navbar, NavDropdown, MenuItem} from 'react-bootstrap';
 import {Image} from 'react-bootstrap';
@@ -127,23 +126,6 @@ class App extends Component {
 
   handleCarouselChange(selectedIndex, event) {
     this.setState({carouselIndex: selectedIndex, carouselDirection: event.direction});
-  }
-
-  renderCarouselItems() {
-    var items = this.state.music.map(function(set) {
-
-      return (
-        <Carousel.Item key={set.url}>
-          <a href={set.url}><Image src={set.metadata.imageUrl} responsive /></a>
-          <Carousel.Caption>
-            <h5>{set.metadata.title}</h5>
-            ({set.originalUser.firstName} - {set.originalDate})
-          </Carousel.Caption>
-        </Carousel.Item>
-        );
-    });
-
-    return items;
   }
 
   handleSwipeItemClick(event) {

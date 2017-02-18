@@ -6,10 +6,13 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 
 import com.abarruda.musicbot.config.Configuration;
 import com.abarruda.musicbot.message.TelegramMessage;
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 
 public class MessageManager extends TelegramLongPollingBot {
+	
+	private static final MetricRegistry metrics = new MetricRegistry();
 		
 	private final EventBus eventBus;
 	private final String userName;
@@ -26,7 +29,8 @@ public class MessageManager extends TelegramLongPollingBot {
 
 	@Override
 	public void onUpdateReceived(final Update update) {
-
+		metrics.meter("updates-received").mark();
+		
 		if (update.hasMessage()) {
 			final Message message = update.getMessage();
 			

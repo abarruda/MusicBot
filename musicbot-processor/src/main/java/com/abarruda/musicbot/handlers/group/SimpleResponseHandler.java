@@ -83,7 +83,7 @@ public class SimpleResponseHandler {
 		
 		try {
 			final FileInputStream input = new FileInputStream(RESPONSES_FILE);
-			BufferedReader br = new BufferedReader(new InputStreamReader(input));
+			final BufferedReader br = new BufferedReader(new InputStreamReader(input));
 			
 			String line = null;
 			while ((line = br.readLine()) != null) {
@@ -103,34 +103,47 @@ public class SimpleResponseHandler {
 		return loadedResponses;
 	}
 	
-	@Subscribe
-	public void handleMessage(final TelegramMessage.GroupMessage groupMessage) {
-		final Message message = groupMessage.getMessage();
+	static class HandleMessageRunnable implements Runnable {
 		
-		new Thread(new Runnable() {
-			
-			@Override
-			public void run() {
-				if (message.hasText()) {
-					final String chatId = message.getChatId().toString();
-					final Map<String, String> mappingForChat = chatToTermResponseMapping.get(chatId);
-					
-					if (mappingForChat != null) {
-						for (final String term : mappingForChat.keySet()) {
-							if (message.getText().toLowerCase().contains(term.toLowerCase())) {
-								eventBus.post(TextResponse.createResponse(
-										message.getChatId().toString(), 
-										mappingForChat.get(term), 
-										true,
-										false));
-							}
+		final private Message message;
+		final private EventBus eventBus;
+		final private Map<String, Map<String, String>> mapping;
+		
+		public HandleMessageRunnable(final Message message, final EventBus eventBus, Map<String, Map<String, String>> mapping) {
+			this.message = message;
+			this.eventBus = eventBus;
+			this.mapping = mapping;
+		}
+
+		@Override
+		public void run() {
+			if (message.hasText()) {
+				final String chatId = message.getChatId().toString();
+				final Map<String, String> mappingForChat = mapping.get(chatId);
+				
+				if (mappingForChat != null) {
+					for (final String term : mappingForChat.keySet()) {
+						if (message.getText().toLowerCase().contains(term.toLowerCase())) {
+							eventBus.post(TextResponse.createResponse(
+									message.getChatId().toString(), 
+									mappingForChat.get(term), 
+									true,
+									false));
 						}
 					}
-					
 				}
 				
 			}
-		}).start();
+			
+		}
+		
+	}
+	
+	@Subscribe
+	public void handleMessage(final TelegramMessage.GroupMessage groupMessage) {
+		final Message message = groupMessage.getMessage();
+		new Thread(new HandleMessageRunnable(message, eventBus, chatToTermResponseMapping)).start();
+
 	}
 
 }
