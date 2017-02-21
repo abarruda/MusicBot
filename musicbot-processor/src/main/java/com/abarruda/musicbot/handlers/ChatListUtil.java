@@ -10,10 +10,12 @@ import com.abarruda.musicbot.processor.responder.responses.InlineButtonResponse.
 
 public class ChatListUtil {
 	
+	public static final String INACTIVE_USER_TEXT = "You must be active in a chat within the last week to create an Auto Responder";
+	
 	private static TextResponse getInactiveTextResponse(String chatId) {
 		return TextResponse.createResponse(
 				chatId, 
-				"You must be active in a chat within the last week to create an Auto Responder", 
+				INACTIVE_USER_TEXT, 
 				false, 
 				false);
 	}

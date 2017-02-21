@@ -1,5 +1,7 @@
 package com.abarruda.musicbot.modules;
 
+import java.util.concurrent.Executors;
+
 import com.abarruda.musicbot.BotServer;
 import com.abarruda.musicbot.ChatManager;
 import com.abarruda.musicbot.MessageManager;
@@ -18,9 +20,12 @@ import com.abarruda.musicbot.processor.item.ItemValidator;
 import com.abarruda.musicbot.processor.metadata.MetadataScraper;
 import com.abarruda.musicbot.processor.metadata.MusicSetMetadataProcessor;
 import com.abarruda.musicbot.processor.responder.Responder;
+import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
 import com.google.inject.Scopes;
+import com.google.inject.Singleton;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 
 public class BotModule extends AbstractModule {
@@ -37,7 +42,7 @@ public class BotModule extends AbstractModule {
 		install(new DatabaseModule());
 		
 		bind(BotServer.class).in(Scopes.SINGLETON);
-		bind(EventBus.class).in(Scopes.SINGLETON);
+		//bind(EventBus.class).in(Scopes.SINGLETON);
 		bind(MessageManager.class).in(Scopes.SINGLETON);
 		bind(Responder.class).in(Scopes.SINGLETON);
 		bind(ChatManager.class).in(Scopes.SINGLETON);
@@ -61,6 +66,12 @@ public class BotModule extends AbstractModule {
 		bind(StatsHandler.class);
 		bind(TermResponseInputHandler.class);
 		bind(BrowseSetsHandler.class);
+	}
+	
+	@Provides @Singleton
+	EventBus provideEventBus() {
+		final AsyncEventBus eventBus = new AsyncEventBus("EventBus", Executors.newFixedThreadPool(100));
+		return eventBus;
 	}
 
 }

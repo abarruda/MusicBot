@@ -53,26 +53,18 @@ public class HelpMessageHandler {
 	public void handleMessage(final TelegramMessage.PrivateMessage privateMessage) {
 		final Message message = privateMessage.getMessage();
 		
-		new Thread(new Runnable() {
+		if (HELP_MESSAGE_PREDICATE.apply(message)) {
+			final TextButtonResponseBuilder builder = new TextButtonResponseBuilder()
+					.setChatId(message.getChatId().toString())
+					.setSilent(true)
+					.setText(HELP_MESSAGE)
+					.addButtonRow(TextButtonResponseBuilder.newButton(TermResponseInputHandler.AUTO_RESPONDER_COMMAND))
+					.addButtonRow(TextButtonResponseBuilder.newButton(BrowseSetsHandler.COMMAND_BROWSE_MUSIC))
+					.addButtonRow(TextButtonResponseBuilder.newButton(FeedbackHandler.FEEDBACK_COMMAND));
 			
-			@Override
-			public void run() {
-				if (HELP_MESSAGE_PREDICATE.apply(message)) {
-					final TextButtonResponseBuilder builder = new TextButtonResponseBuilder()
-							.setChatId(message.getChatId().toString())
-							.setSilent(true)
-							.setText(HELP_MESSAGE)
-							.addButtonRow(TextButtonResponseBuilder.newButton(TermResponseInputHandler.AUTO_RESPONDER_COMMAND))
-							.addButtonRow(TextButtonResponseBuilder.newButton(BrowseSetsHandler.COMMAND_BROWSE_MUSIC))
-							.addButtonRow(TextButtonResponseBuilder.newButton(FeedbackHandler.FEEDBACK_COMMAND));
-					
-					eventBus.post(TextButtonResponse.createResponse(builder));  
-				}
-				
-			}
-		}).start();
+			eventBus.post(TextButtonResponse.createResponse(builder));  
+		}
 
-		
 	}
 
 }

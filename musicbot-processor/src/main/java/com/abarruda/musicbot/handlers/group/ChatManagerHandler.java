@@ -24,26 +24,18 @@ public class ChatManagerHandler {
 	@Subscribe
 	public void handleMessage(final TelegramMessage.GroupMessage groupMessage) {
 		final Message message = groupMessage.getMessage();
-		
-		new Thread(new Runnable() {
-			
-			@Override
-			public void run() {
-				final User user = message.getFrom();
-				try {
-					chatManager.update(
-							message.getChatId().toString(),
-							message.getChat().getTitle(), 
-							user.getId(),
-							user.getFirstName(),
-							user.getLastName(),
-							message.getDate().toString());
-				} catch (Exception e) {
-					logger.error("Error updating ChatManager!", e);
-				}
-				
-			}
-		}).start();
+		final User user = message.getFrom();
+		try {
+			chatManager.update(
+					message.getChatId().toString(),
+					message.getChat().getTitle(), 
+					user.getId(),
+					user.getFirstName(),
+					user.getLastName(),
+					message.getDate().toString());
+		} catch (Exception e) {
+			logger.error("Error updating ChatManager!", e);
+		}
 	}
 
 }

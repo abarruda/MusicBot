@@ -100,116 +100,101 @@ public class TermResponseInputHandler {
 	
 	@Subscribe
 	public void handleCallbackQuery(final CallbackQuery query) {
-		
-		new Thread(new Runnable() {
+		final CallbackQueryInfo queryInfo = CallbackQueryUtil.getInfo(query);
+		if (queryInfo.source.equals(TermResponseInputHandler.class.getSimpleName())) {
 			
-			@Override
-			public void run() {
-				final CallbackQueryInfo queryInfo = CallbackQueryUtil.getInfo(query);
-				if (queryInfo.source.equals(TermResponseInputHandler.class.getSimpleName())) {
-					
-					final int userId = query.getFrom().getId();
-					final String directChatId = query.getMessage().getChatId().toString();
-					final String chatIdFromButton = queryInfo.data;
-					
-					if (!chatManager.getChatsForUserFromCache(userId).values().contains(chatIdFromButton)) {
-						eventBus.post(getInactiveTextResponse(directChatId));
-					}
-					
-					final String chatIdForAutoResponder = queryInfo.data;
-					
-					// check if they already have made their allotment
-					for (final TermResponse tr : db.getTermResponses(chatIdForAutoResponder)) {
-						if (tr.userId == userId) {
-							eventBus.post(TextResponse.createResponse(
-									directChatId, 
-									"Sorry, you have already made a submission, now fuck off and wait a week!", 
-									false,
-									false));
-						}
-					}
-					
-					final AutoResponderInputState state = new AutoResponderInputState();
-					state.chatId = chatIdForAutoResponder;
-					cache.put(userId, state);
-					
-					eventBus.post(ForceReplyTextResponse.createResponse(
-							directChatId,
-							"What term do you want to look for?",
-							false, 
+			final int userId = query.getFrom().getId();
+			final String directChatId = query.getMessage().getChatId().toString();
+			final String chatIdFromButton = queryInfo.data;
+			
+			if (!chatManager.getChatsForUserFromCache(userId).values().contains(chatIdFromButton)) {
+				eventBus.post(getInactiveTextResponse(directChatId));
+			}
+			
+			final String chatIdForAutoResponder = queryInfo.data;
+			
+			// check if they already have made their allotment
+			for (final TermResponse tr : db.getTermResponses(chatIdForAutoResponder)) {
+				if (tr.userId == userId) {
+					eventBus.post(TextResponse.createResponse(
+							directChatId, 
+							"Sorry, you have already made a submission, now fuck off and wait a week!", 
+							false,
 							false));
 				}
 			}
-		}).start();
-		
+			
+			final AutoResponderInputState state = new AutoResponderInputState();
+			state.chatId = chatIdForAutoResponder;
+			cache.put(userId, state);
+			
+			eventBus.post(ForceReplyTextResponse.createResponse(
+					directChatId,
+					"What term do you want to look for?",
+					false, 
+					false));
+		}
 	}
 
 	@Subscribe
 	public void handleMessage(TelegramMessage.PrivateMessage privateMessage) {
 		final Message message = privateMessage.getMessage();
-		
-		new Thread(new Runnable() {
+		if (message.hasText()) {
+			final int userId = message.getFrom().getId();
+			final String directMessageChatId = message.getChatId().toString();
 			
-			@Override
-			public void run() {
-				if (message.hasText()) {
-					final int userId = message.getFrom().getId();
-					final String directMessageChatId = message.getChatId().toString();
+			if (message.getText().equals(AUTO_RESPONDER_COMMAND)) {
+				
+				eventBus.post(ChatListUtil.getChatListForUser(chatManager, directMessageChatId, userId, 
+						"Which chat would you like to apply the Auto Responder to?",
+						TermResponseInputHandler.class.getSimpleName()));
+				
+			} else if (cache.getIfPresent(userId) != null) {
+				
+				final AutoResponderInputState state = cache.getIfPresent(userId);
+				
+				if (!state.isComplete() && state.term == null) {
 					
-					if (message.getText().equals(AUTO_RESPONDER_COMMAND)) {
-						
-						eventBus.post(ChatListUtil.getChatListForUser(chatManager, directMessageChatId, userId, 
-								"Which chat would you like to apply the Auto Responder to?",
-								TermResponseInputHandler.class.getSimpleName()));
-						
-					} else if (cache.getIfPresent(userId) != null) {
-						
-						final AutoResponderInputState state = cache.getIfPresent(userId);
-						
-						if (!state.isComplete() && state.term == null) {
-							
-							final String termFromUser = message.getText();
-							state.term = termFromUser;
-							cache.put(userId, state);
-							
-							final StringBuilder responseText = new StringBuilder();
-							responseText.append("What response do you want to send when '");
-							responseText.append(termFromUser);
-							responseText.append("' is seen?");
-							
-							eventBus.post(ForceReplyTextResponse.createResponse(
-									directMessageChatId, 
-									responseText.toString(),
-									false, 
-									false));
-							
-						} else if (!state.isComplete() && state.term != null && state.response == null) {
-							String responseFromUser = message.getText();
-							responseFromUser = slanderProofMatchingTerm(responseFromUser, message.getFrom().getFirstName());
-							
-							final TermResponse autoResponse = new TermResponse(userId,
-									new Date(),
-									state.term, responseFromUser);
-							
-							db.insertTermResponse(state.chatId, autoResponse);
-							cache.invalidate(userId);
-							eventBus.post(TextResponse.createResponse(
-									directMessageChatId, 
-									"Successfully created!  Wait a minute for the response to become active.", 
-									false,
-									false));
-							
-						} else {
-							logger.error("Unexpected state for AutoResponder input!");
-						}
-						
-					} else {
-						// Can't do the following as it'll also impact other commands
-						//return TextResponse.createSessionExpiredResponse(chatId);
-					}
+					final String termFromUser = message.getText();
+					state.term = termFromUser;
+					cache.put(userId, state);
+					
+					final StringBuilder responseText = new StringBuilder();
+					responseText.append("What response do you want to send when '");
+					responseText.append(termFromUser);
+					responseText.append("' is seen?");
+					
+					eventBus.post(ForceReplyTextResponse.createResponse(
+							directMessageChatId, 
+							responseText.toString(),
+							false, 
+							false));
+					
+				} else if (!state.isComplete() && state.term != null && state.response == null) {
+					String responseFromUser = message.getText();
+					responseFromUser = slanderProofMatchingTerm(responseFromUser, message.getFrom().getFirstName());
+					
+					final TermResponse autoResponse = new TermResponse(userId,
+							new Date(),
+							state.term, responseFromUser);
+					
+					db.insertTermResponse(state.chatId, autoResponse);
+					cache.invalidate(userId);
+					eventBus.post(TextResponse.createResponse(
+							directMessageChatId, 
+							"Successfully created!  Wait a minute for the response to become active.", 
+							false,
+							false));
+					
+				} else {
+					logger.error("Unexpected state for AutoResponder input!");
 				}
+				
+			} else {
+				// Can't do the following as it'll also impact other commands
+				//return TextResponse.createSessionExpiredResponse(chatId);
 			}
-		}).start();
+		}
 		
 	}
 

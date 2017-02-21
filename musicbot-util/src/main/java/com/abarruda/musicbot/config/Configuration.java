@@ -9,6 +9,9 @@ public class Configuration {
 	public static String API_TOKEN = "api.token";
 	public static String DATABASE_ADDRESS = "db.address";
 	public static String DATABASE_NAME = "db.name";
+	public static String DATABASE_USER = "db.user";
+	public static String DATABASE_USER_DB = "db.user.db";
+	public static String DATABASE_USER_PASSWORD = "db.user.password";
 	public static String AUTORESPONSE_DURATION = "handler.autoresponse.duration";
 	public static String WEBSITE = "website";
 	

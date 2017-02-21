@@ -115,21 +115,13 @@ public class LoggingHandler {
 	@Subscribe
 	public void handleMessage(final TelegramMessage.GroupMessage groupMessage) {
 		final Message message = groupMessage.getMessage();
-		
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				
-				if (message.hasText()) {
-					try {
-						writeMessageToLog(message);
-					} catch (final Exception e) {
-						logger.error("Unable to log message for chat " + message.getChatId().toString() + "!", e);
-					}
-				}
-				
+		if (message.hasText()) {
+			try {
+				writeMessageToLog(message);
+			} catch (final Exception e) {
+				logger.error("Unable to log message for chat " + message.getChatId().toString() + "!", e);
 			}
-		}).start();
+		}
 		
 	}
 

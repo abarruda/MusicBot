@@ -11,6 +11,7 @@ import org.telegram.telegrambots.api.objects.User;
 import com.abarruda.musicbot.persistence.DatabaseFacade;
 import com.abarruda.musicbot.items.DetectedContent;
 import com.abarruda.musicbot.items.RemoteContent;
+import com.abarruda.musicbot.message.TelegramMessage;
 import com.abarruda.musicbot.processor.responder.responses.TextResponse;
 import com.google.common.collect.Lists;
 import com.google.common.eventbus.EventBus;
@@ -59,70 +60,64 @@ public class RemoteContentHandler {
 	}
 	
 	@Subscribe
-	public void handleMessage(final Message message) {
-		new Thread(new Runnable() {
+	public void handleMessage(final TelegramMessage.GroupMessage groupMessage) {
+		final Message message = groupMessage.getMessage();
+		if (message.hasText()) {
 			
-			@Override
-			public void run() {
-				if (message.hasText()) {
-					
-					final String chatId = message.getChatId().toString();
-					
-					final Set<DetectedContent> remoteContents = getContent(message, message.getFrom());
-					
-					if (remoteContents.size() > 0) {
-						final List<DetectedContent> remoteContentToBeInserted = Lists.newArrayList();
-						final List<String> messagesToSend = Lists.newArrayList();
+			final String chatId = message.getChatId().toString();
+			
+			final Set<DetectedContent> remoteContents = getContent(message, message.getFrom());
+			
+			if (remoteContents.size() > 0) {
+				final List<DetectedContent> remoteContentToBeInserted = Lists.newArrayList();
+				final List<String> messagesToSend = Lists.newArrayList();
+				
+				for(final DetectedContent set : remoteContents) {
+					try {
+						final RemoteContent trackedRemoteContent = db.getRemoteContent(chatId, set.url);
 						
-						for(final DetectedContent set : remoteContents) {
-							try {
-								final RemoteContent trackedRemoteContent = db.getRemoteContent(chatId, set.url);
-								
-								if (trackedRemoteContent == null) {
-									// insert
-									remoteContentToBeInserted.add(set);
-								} else {						
-									// Update the DB
-									db.updateRemoteContentReference(chatId, set);
-									
-									
-									// Send the message to the outgoing queue
-									final int referenceCount = trackedRemoteContent.references.size() + 1 + 1; // +1 for the original post, +1 for this post
-									final StringBuilder messageText = new StringBuilder();
-									messageText.append(trackedRemoteContent.url);
-									messageText.append(" was originally posted by ");
-									messageText.append(trackedRemoteContent.originalUser.firstName);
-									messageText.append(" on ");
-									messageText.append(new Date(trackedRemoteContent.originalDate * 1000L));
-									messageText.append(".  Referenced ");
-									messageText.append(referenceCount);
-									messageText.append(" time(s).");
-									messagesToSend.add(messageText.toString());								
-								}
-							} catch (Exception e) {
-								logger.error(e);
-							}
+						if (trackedRemoteContent == null) {
+							// insert
+							remoteContentToBeInserted.add(set);
+						} else {						
+							// Update the DB
+							db.updateRemoteContentReference(chatId, set);
+							
+							
+							// Send the message to the outgoing queue
+							final int referenceCount = trackedRemoteContent.references.size() + 1 + 1; // +1 for the original post, +1 for this post
+							final StringBuilder messageText = new StringBuilder();
+							messageText.append(trackedRemoteContent.url);
+							messageText.append(" was originally posted by ");
+							messageText.append(trackedRemoteContent.originalUser.firstName);
+							messageText.append(" on ");
+							messageText.append(new Date(trackedRemoteContent.originalDate * 1000L));
+							messageText.append(".  Referenced ");
+							messageText.append(referenceCount);
+							messageText.append(" time(s).");
+							messagesToSend.add(messageText.toString());								
 						}
-						
-						if (remoteContentToBeInserted.size() > 0) {
-							db.insertRemoteContent(chatId, remoteContentToBeInserted);
-						}
-						
-						if (messagesToSend.size() > 0) {
-							final StringBuilder responseMessageText = new StringBuilder();
-							String delim = "";
-							for (final String responseMessage : messagesToSend) {
-								responseMessageText.append(delim);
-								responseMessageText.append(responseMessage);
-								delim = "\n";
-							}
-							eventBus.post(TextResponse.createResponse(message.getChatId().toString(), responseMessageText.toString(), true, false));
-						}
+					} catch (Exception e) {
+						logger.error(e);
 					}
 				}
 				
+				if (remoteContentToBeInserted.size() > 0) {
+					db.insertRemoteContent(chatId, remoteContentToBeInserted);
+				}
+				
+				if (messagesToSend.size() > 0) {
+					final StringBuilder responseMessageText = new StringBuilder();
+					String delim = "";
+					for (final String responseMessage : messagesToSend) {
+						responseMessageText.append(delim);
+						responseMessageText.append(responseMessage);
+						delim = "\n";
+					}
+					eventBus.post(TextResponse.createResponse(message.getChatId().toString(), responseMessageText.toString(), true, false));
+				}
 			}
-		}).start();
+		}
 		
 	}
 }

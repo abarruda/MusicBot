@@ -42,60 +42,53 @@ public class FeedbackHandler {
 	@Subscribe
 	public void handleMessage(TelegramMessage.PrivateMessage privateMessage) {
 		final Message message = privateMessage.getMessage();
-		
-		new Thread(new Runnable() {
+		if (message.hasText()) {
 			
-			@Override
-			public void run() {
-				if (message.hasText()) {
-					
-					final String chatId = message.getChatId().toString();
-					final String userId = message.getFrom().getId().toString();
-					
-					if (message.getText().equals(FEEDBACK_COMMAND) && cache.getIfPresent(userId) == null) {
-						cache.put(userId, true);
-						eventBus.post(ForceReplyTextResponse.createResponse(
-								chatId, 
-								"What feedback would you like to give?", 
-								true,
-								false));
-					} else if (cache.getIfPresent(userId) != null && cache.getIfPresent(userId)) {
-						final String userFirstName = message.getFrom().getFirstName();
-						final String userLastName = message.getFrom().getLastName();
-						
-						final StringBuilder feedback = new StringBuilder();
-						feedback.append(new Date());
-						feedback.append(" - ");
-						feedback.append(userFirstName);
-						feedback.append(" ");
-						feedback.append(userLastName);
-						feedback.append("(");
-						feedback.append(userId);
-						feedback.append(") - '");
-						feedback.append(message.getText());
-						feedback.append("'");
-						feedback.append("\n");
-						
-						FileWriter file = null;
-						try {
-							file = new FileWriter(OUTPUT_FILE);
-							file.write(feedback.toString());
-						} catch (IOException e) {
-							logger.error("Cannot write to feedback log!", e);
-						} finally {
-							try {
-								file.close();
-							} catch (IOException e) {
-								logger.error("Cannot close file!", e);
-							}
-							cache.invalidate(userId);
-							eventBus.post(TextResponse.createResponse(chatId, "Thank you for your feedback!", true, false));
-						}
-					}
+			final String chatId = message.getChatId().toString();
+			final String userId = message.getFrom().getId().toString();
+			
+			if (message.getText().equals(FEEDBACK_COMMAND) && cache.getIfPresent(userId) == null) {
+				cache.put(userId, true);
+				eventBus.post(ForceReplyTextResponse.createResponse(
+						chatId, 
+						"What feedback would you like to give?", 
+						true,
+						false));
+			} else if (cache.getIfPresent(userId) != null && cache.getIfPresent(userId)) {
+				final String userFirstName = message.getFrom().getFirstName();
+				final String userLastName = message.getFrom().getLastName();
 				
+				final StringBuilder feedback = new StringBuilder();
+				feedback.append(new Date());
+				feedback.append(" - ");
+				feedback.append(userFirstName);
+				feedback.append(" ");
+				feedback.append(userLastName);
+				feedback.append("(");
+				feedback.append(userId);
+				feedback.append(") - '");
+				feedback.append(message.getText());
+				feedback.append("'");
+				feedback.append("\n");
+				
+				FileWriter file = null;
+				try {
+					file = new FileWriter(OUTPUT_FILE);
+					file.write(feedback.toString());
+				} catch (IOException e) {
+					logger.error("Cannot write to feedback log!", e);
+				} finally {
+					try {
+						file.close();
+					} catch (IOException e) {
+						logger.error("Cannot close file!", e);
+					}
+					cache.invalidate(userId);
+					eventBus.post(TextResponse.createResponse(chatId, "Thank you for your feedback!", true, false));
 				}
 			}
-		}).start();
+		
+		}
 
 	}
 		

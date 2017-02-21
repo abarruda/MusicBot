@@ -71,8 +71,10 @@ public class SimpleResponseHandler {
 	public SimpleResponseHandler(final Configuration configuration, final EventBus eventBus, final DatabaseFacade db) {
 		this.configuration = configuration;
 		this.eventBus = eventBus;
-		mapping = loadResponsesFromFile();
 		this.db = db;
+		
+		mapping = loadResponsesFromFile();
+		termResponseMaintainer.run();
 		final ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("Term-Response-Maintainer-thread-%d").build();
 		executor = Executors.newScheduledThreadPool(1, threadFactory);
 		executor.scheduleAtFixedRate(termResponseMaintainer, 0, 15, TimeUnit.SECONDS);
@@ -103,46 +105,26 @@ public class SimpleResponseHandler {
 		return loadedResponses;
 	}
 	
-	static class HandleMessageRunnable implements Runnable {
-		
-		final private Message message;
-		final private EventBus eventBus;
-		final private Map<String, Map<String, String>> mapping;
-		
-		public HandleMessageRunnable(final Message message, final EventBus eventBus, Map<String, Map<String, String>> mapping) {
-			this.message = message;
-			this.eventBus = eventBus;
-			this.mapping = mapping;
-		}
-
-		@Override
-		public void run() {
-			if (message.hasText()) {
-				final String chatId = message.getChatId().toString();
-				final Map<String, String> mappingForChat = mapping.get(chatId);
-				
-				if (mappingForChat != null) {
-					for (final String term : mappingForChat.keySet()) {
-						if (message.getText().toLowerCase().contains(term.toLowerCase())) {
-							eventBus.post(TextResponse.createResponse(
-									message.getChatId().toString(), 
-									mappingForChat.get(term), 
-									true,
-									false));
-						}
-					}
-				}
-				
-			}
-			
-		}
-		
-	}
-	
 	@Subscribe
 	public void handleMessage(final TelegramMessage.GroupMessage groupMessage) {
 		final Message message = groupMessage.getMessage();
-		new Thread(new HandleMessageRunnable(message, eventBus, chatToTermResponseMapping)).start();
+		if (message.hasText()) {
+			final String chatId = message.getChatId().toString();
+			final Map<String, String> mappingForChat = chatToTermResponseMapping.get(chatId);
+			
+			if (mappingForChat != null) {
+				for (final String term : mappingForChat.keySet()) {
+					if (message.getText().toLowerCase().contains(term.toLowerCase())) {
+						eventBus.post(TextResponse.createResponse(
+								message.getChatId().toString(), 
+								mappingForChat.get(term), 
+								true,
+								false));
+					}
+				}
+			}
+			
+		}
 
 	}
 
