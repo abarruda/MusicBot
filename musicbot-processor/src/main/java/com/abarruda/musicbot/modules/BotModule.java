@@ -1,6 +1,7 @@
 package com.abarruda.musicbot.modules;
 
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 import com.abarruda.musicbot.BotServer;
 import com.abarruda.musicbot.ChatManager;
@@ -15,6 +16,7 @@ import com.abarruda.musicbot.handlers.group.ChatManagerHandler;
 import com.abarruda.musicbot.handlers.group.LoggingHandler;
 import com.abarruda.musicbot.handlers.group.SimpleResponseHandler;
 import com.abarruda.musicbot.handlers.group.content.RemoteContentHandler;
+import com.abarruda.musicbot.metrics.MetricsModule;
 import com.abarruda.musicbot.persistence.DatabaseModule;
 import com.abarruda.musicbot.processor.item.ItemValidator;
 import com.abarruda.musicbot.processor.metadata.MetadataScraper;
@@ -22,6 +24,7 @@ import com.abarruda.musicbot.processor.metadata.MusicSetMetadataProcessor;
 import com.abarruda.musicbot.processor.responder.Responder;
 import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
@@ -40,9 +43,9 @@ public class BotModule extends AbstractModule {
 	protected void configure() {
 		install(new ConfigurationModule(configFileLocation));
 		install(new DatabaseModule());
+		install(new MetricsModule());
 		
 		bind(BotServer.class).in(Scopes.SINGLETON);
-		//bind(EventBus.class).in(Scopes.SINGLETON);
 		bind(MessageManager.class).in(Scopes.SINGLETON);
 		bind(Responder.class).in(Scopes.SINGLETON);
 		bind(ChatManager.class).in(Scopes.SINGLETON);
@@ -70,7 +73,11 @@ public class BotModule extends AbstractModule {
 	
 	@Provides @Singleton
 	EventBus provideEventBus() {
-		final AsyncEventBus eventBus = new AsyncEventBus("EventBus", Executors.newFixedThreadPool(100));
+		final ThreadFactory threadFactory = new ThreadFactoryBuilder()
+				.setNameFormat("EventBus-thread-%d")
+				.build();
+		final AsyncEventBus eventBus = new AsyncEventBus("EventBus", 
+				Executors.newFixedThreadPool(100, threadFactory));
 		return eventBus;
 	}
 

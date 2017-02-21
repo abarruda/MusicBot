@@ -13,6 +13,8 @@ import com.abarruda.musicbot.items.DetectedContent;
 import com.abarruda.musicbot.items.RemoteContent;
 import com.abarruda.musicbot.message.TelegramMessage;
 import com.abarruda.musicbot.processor.responder.responses.TextResponse;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import com.google.common.collect.Lists;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -30,11 +32,16 @@ public class RemoteContentHandler {
 	
 	private static final String TYPE_URL = "url";
 	
+	private final MetricRegistry metrics;
 	private final EventBus eventBus;
 	private final DatabaseFacade db;
 	
 	@Inject
-	public RemoteContentHandler(final EventBus eventBus, final DatabaseFacade db) {
+	public RemoteContentHandler(
+			final MetricRegistry metrics, 
+			final EventBus eventBus, 
+			final DatabaseFacade db) {
+		this.metrics = metrics;
 		this.db = db;
 		this.eventBus = eventBus;
 	}
@@ -61,6 +68,9 @@ public class RemoteContentHandler {
 	
 	@Subscribe
 	public void handleMessage(final TelegramMessage.GroupMessage groupMessage) {
+		final Timer timer = metrics.timer("remote-content-processing");
+		Timer.Context context = timer.time();
+		
 		final Message message = groupMessage.getMessage();
 		if (message.hasText()) {
 			
@@ -115,9 +125,9 @@ public class RemoteContentHandler {
 						delim = "\n";
 					}
 					eventBus.post(TextResponse.createResponse(message.getChatId().toString(), responseMessageText.toString(), true, false));
+					context.stop();
 				}
 			}
 		}
-		
 	}
 }

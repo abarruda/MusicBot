@@ -12,19 +12,20 @@ import com.google.inject.Inject;
 
 public class MessageManager extends TelegramLongPollingBot {
 	
-	private static final MetricRegistry metrics = new MetricRegistry();
-		
-	private final EventBus eventBus;
 	private final String userName;
 	private final String token;
+	private final MetricRegistry metrics;
+	private final EventBus eventBus;
 	
 	@Inject
 	public MessageManager(
 			final Configuration config,
+			final MetricRegistry metrics,
 			final EventBus eventBus) {
-		this.eventBus = eventBus;
 		this.userName = config.getConfig(Configuration.BOT_NAME);
 		this.token = config.getConfig(Configuration.API_TOKEN);
+		this.metrics = metrics;
+		this.eventBus = eventBus;
 	}
 
 	@Override
