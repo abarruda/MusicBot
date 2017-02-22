@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.abarruda.musicbot.items.Chat;
 import com.abarruda.musicbot.items.ContentType;
 import com.abarruda.musicbot.items.DetectedContent;
 import com.abarruda.musicbot.items.MusicSet;
@@ -14,6 +15,8 @@ import com.abarruda.musicbot.items.User;
 public interface DatabaseFacade {
 	
 	Map<String, String> getChatIds();
+	
+	public Chat getChatByTelegramId(final String chatId);
 	
 	public void storeChat(final String chatId, final String chatName);
 	

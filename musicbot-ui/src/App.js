@@ -26,6 +26,7 @@ class App extends Component {
     this.state = {
       activeSortKey: 'recent_all',
       chatId: 0,
+      chatName: "",
       userId: 0,
       music: [],
       loadedMusic: false,
@@ -43,6 +44,7 @@ class App extends Component {
     let chatId = uri.chatId;
     let userId = uri.userId;
     
+    this.loadChat(chatId);
     this.loadUsers(chatId);
     this.loadRecentMusicSets(chatId, 'P7D', null);
     this.setState({chatId: chatId, userId: userId});
@@ -59,6 +61,21 @@ class App extends Component {
       method: 'POST',
       success: function(data) {
         console.log(data);
+      }
+    });
+  }
+
+  loadChat(chatId) {
+    $.ajax({
+      url: apiUrl + 'chats/v1/' + chatId,
+      cache: false,
+      success: function(data) {
+        let chatName = data.name;
+        document.title = chatName;
+        this.setState({chatName: chatName});
+      }.bind(this),
+      error: function(jqxhr, status, errorThrown) {
+        console.log("error!");
       }
     });
   }
@@ -219,7 +236,7 @@ class App extends Component {
             <Navbar inverse collapseOnSelect>
 
               <Navbar.Header>
-                <Navbar.Brand>ROOM 2</Navbar.Brand>
+                <Navbar.Brand>{this.state.chatName}</Navbar.Brand>
                 <Navbar.Toggle />
               </Navbar.Header>
 

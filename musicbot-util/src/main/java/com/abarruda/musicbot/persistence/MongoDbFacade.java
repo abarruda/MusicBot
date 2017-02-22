@@ -14,6 +14,7 @@ import org.bson.Document;
 import org.bson.types.ObjectId;
 
 import com.abarruda.musicbot.config.Configuration;
+import com.abarruda.musicbot.items.Chat;
 import com.abarruda.musicbot.items.ContentType;
 import com.abarruda.musicbot.items.DetectedContent;
 import com.abarruda.musicbot.items.MusicSet;
@@ -91,6 +92,13 @@ public class MongoDbFacade implements DatabaseFacade {
 					doc.getString(CHAT_NAME_BSON));
 		}
 		return chatIdsToNames;
+	}
+	
+	@Override
+	public Chat getChatByTelegramId(final String chatId) {
+		final MongoCollection<Document> chatCollection = db.getCollection(CHAT_COLLECTION);
+		final Document chatDoc = chatCollection.find(eq(CHAT_ID_BSON, chatId)).first();
+		return Chat.getChatFromDoc(chatDoc);
 	}
 	
 	@Override
