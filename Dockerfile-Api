@@ -1,0 +1,33 @@
+FROM openjdk:8-alpine
+
+ENV MAVEN_VERSION 3.3.9
+ENV MAVEN_BASE apache-maven-${MAVEN_VERSION}
+
+RUN wget http://apache.cs.utah.edu/maven/maven-3/3.3.9/binaries/${MAVEN_BASE}-bin.tar.gz -O /tmp/maven.tgz && \
+    tar zxvf /tmp/maven.tgz && mv ${MAVEN_BASE} /maven && \
+    ln -s /maven/bin/mvn /usr/bin/ && \
+    rm /tmp/maven.tgz
+
+WORKDIR /musicbot
+
+# Prepare by downloading dependencies
+ADD pom.xml pom.xml
+
+# Adding source, compile and package into a fat jar
+COPY musicbot-api musicbot-api
+COPY musicbot-processor musicbot-processor
+COPY musicbot-util musicbot-util 
+
+# separate the following commands due to heap space issues
+RUN mvn compile -pl musicbot-api -am
+RUN mvn package -pl musicbot-api -am
+
+WORKDIR /musicbot-api
+RUN mv /musicbot/musicbot-api/target/musicbot-api-1.0-SNAPSHOT.jar . && \
+	rm -r /musicbot
+
+COPY api.properties /musicbot-api
+
+EXPOSE 80
+
+CMD java -jar musicbot-api-1.0-SNAPSHOT.jar api.properties
