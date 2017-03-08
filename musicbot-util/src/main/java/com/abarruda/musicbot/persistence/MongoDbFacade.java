@@ -64,7 +64,7 @@ public class MongoDbFacade implements DatabaseFacade {
 		final String databaseName = configuration.getConfig(Configuration.DATABASE_NAME);
 		
 		final List<ServerAddress> seeds = Lists.newArrayList(new ServerAddress(address)); 
-		final List<MongoCredential> creds = Lists.newArrayList(MongoCredential.createMongoCRCredential(dbUser, dbUserDatabase, dbUserPassword));
+		final List<MongoCredential> creds = Lists.newArrayList(MongoCredential.createCredential(dbUser, dbUserDatabase, dbUserPassword));
 		mongoClient = new MongoClient(seeds, creds);
 		db = mongoClient.getDatabase(databaseName);
 	}

@@ -2,10 +2,39 @@ version: '2'
 
 services:
 
+  db:
+    container_name: db
+    build:
+      context: .
+      dockerfile: Dockerfile-Db
+    volumes:
+      - mongodb-data:/data/db
+
+  bot:
+    container_name: bot
+    build:
+      context: .
+      dockerfile: Dockerfile-Processor
+    depends_on:
+      - db
+
   api:
     container_name: api
     build:
       context: .
       dockerfile: Dockerfile-Api
+    depends_on:
+      - db
+
+  ui:
+    container_name: ui
+    build:
+      context: .
+      dockerfile: Dockerfile-Ui
+    depends_on:
+      - api
     ports:
-      - "80"
+      - "80:80"
+
+volumes:
+  mongodb-data:

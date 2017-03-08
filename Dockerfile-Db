@@ -1,0 +1,9 @@
+FROM mvertes/alpine-mongo
+
+VOLUME /data/db
+
+EXPOSE 27017
+
+ADD musicbot-db/run.sh /run.sh
+
+CMD "/run.sh"

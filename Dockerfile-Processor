@@ -18,12 +18,13 @@ COPY musicbot-api musicbot-api
 COPY musicbot-processor musicbot-processor
 COPY musicbot-util musicbot-util 
 
-RUN export MAVEN_OPTS="-Xmx256M" && mvn package -pl musicbot-api -am
+RUN export MAVEN_OPTS="-Xmx256M" && mvn package -pl musicbot-processor -am
 
-WORKDIR /musicbot-api
-RUN mv /musicbot/musicbot-api/target/musicbot-api-1.0-SNAPSHOT.jar . && \
+WORKDIR /musicbot-processor
+RUN mkdir logging
+RUN mv /musicbot/musicbot-processor/target/musicbot-processor-1.0-SNAPSHOT.jar . && \
 	rm -r /musicbot
 
-COPY musicbot-api/api.properties /musicbot-api
+COPY musicbot-processor/processor.properties /musicbot-processor
 
-CMD java -jar musicbot-api-1.0-SNAPSHOT.jar api.properties
+CMD java -jar musicbot-processor-1.0-SNAPSHOT.jar processor.properties

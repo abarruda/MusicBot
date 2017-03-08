@@ -1,0 +1,17 @@
+FROM smebberson/alpine-nginx-nodejs
+
+RUN npm install -g create-react-app
+
+COPY musicbot-ui /ui
+WORKDIR /ui
+RUN touch src/config/globalConfigs.js
+RUN npm install
+RUN npm run build
+
+COPY musicbot-ui/nginx.config /etc/nginx/sites-available/musicbot-ui
+RUN mkdir /etc/nginx/sites-enabled
+RUN ln -s /etc/nginx/sites-available/musicbot-ui /etc/nginx/sites-enabled/default
+
+EXPOSE 80
+
+CMD nginx
