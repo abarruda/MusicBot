@@ -1,5 +1,7 @@
 FROM mvertes/alpine-mongo
 
+ENV MONGODB_PASS cHaNgEmE!
+
 VOLUME /data/db
 
 EXPOSE 27017

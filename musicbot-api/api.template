@@ -1,0 +1,7 @@
+api.port = 80
+
+db.address = db
+db.user = admin
+db.user.db = admin
+db.user.password = 
+db.name = musicbot

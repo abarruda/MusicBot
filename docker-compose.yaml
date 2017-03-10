@@ -9,6 +9,8 @@ services:
       dockerfile: Dockerfile-Db
     volumes:
       - mongodb-data:/data/db
+    environment:
+      - MONGODB_PASS=${MONGODB_PASS}
 
   bot:
     container_name: bot
