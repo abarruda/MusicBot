@@ -1,5 +1,7 @@
 FROM mvertes/alpine-mongo
 
+RUN apk add --no-cache mongodb-tools
+
 ENV MONGODB_PASS cHaNgEmE!
 
 VOLUME /data/db
