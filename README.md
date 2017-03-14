@@ -15,7 +15,7 @@ MusicBot is a automated bot that tracks music content detected in group messages
 - Mixcloud (coming soon)
 
 ## Getting Started
-1. Add the existing bot I run `Room2Bot` to your Telegram [group](https://telegram.org/faq#q-what-makes-telegram-groups-cool), or if you have privacy concerns, follow the [Installation Instructions](#installation-instructions) to get the bot up and running.
+1. Add the existing bot I run `@TheMusicBot` to your Telegram [group](https://telegram.org/faq#q-what-makes-telegram-groups-cool), or if you have privacy concerns, follow the [Installation Instructions](#installation-instructions) to get the bot up and running.
 2. Start sending videos and audio links to your group.
 3. Message the bot directly with the command `/help` for instructions to start browsing your custom curated content!
 
@@ -25,20 +25,21 @@ MusicBot is a automated bot that tracks music content detected in group messages
 1. Register your bot with the [BotFather](https://core.telegram.org/bots#6-botfather) and note the following:
   - API Token
   - Bot Username
-2. Clone this repository onto the system.
-3. Set your database password: `export MONGODB_PASS=<password>`
-4. Configure the API properties:
+2. Set [privacy mode](https://core.telegram.org/bots#privacy-mode) to **disabled**.
+3. Clone this repository onto the system.
+4. Set your database password: `export MONGODB_PASS=<password>`
+5. Configure the API properties:
   1. rename `MusicBot/musicbot-api/api.template` to `MusicBot/musicbot-api/api.properties`
   2. edit `api.properties` and fill in the above password for the `db.user.password` property.
-5. Configure the Bot properties:
+6. Configure the Bot properties:
   1. rename `MusicBot/musicbot-processor/processor.template` to `MusicBot/musicbot-processor/processor.properties`
   2. edit `processor.properties` and fill in the following properpties:
     - `api.token` : The API token provided to you by the [BotFather](https://core.telegram.org/bots#6-botfather).
     - `bot.name` : The username of the bot.
-    - `website` : The URI of the host for the bot's mobile UI (do not include a trailing slash).
+    - `website` : The URI of the host for the bot's mobile UI (include a trailing slash).
     - `db.user.password` : The database password you set in step 3.
-3. Run `docker-compose build` to build the docker images that comproise the **MusicBot** service.
-4. Run `docker-compose up` to start the bot's services.
+7. Run `docker-compose build` to build the docker images that comproise the **MusicBot** service.
+8. Run `docker-compose up` to start the bot's services.
 
 #### Technologies
 - Java
