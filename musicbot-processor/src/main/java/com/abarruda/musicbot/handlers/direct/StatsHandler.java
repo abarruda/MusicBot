@@ -51,7 +51,7 @@ public class StatsHandler {
 					}
 					
 					responseString.append("\n*Music Sets:*\n");
-					responseString.append("# Sets: " + db.getRemoteContentCount(chatId));
+					responseString.append("# Sets: " + db.getRemoteContentCount(chatId) + "\n\n");
 				}
 				
 				if (Strings.isNullOrEmpty(responseString.toString())) {
