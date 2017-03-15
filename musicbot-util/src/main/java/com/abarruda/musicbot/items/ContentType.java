@@ -8,8 +8,8 @@ import com.google.common.collect.Lists;
 
 public enum ContentType {
 	
-	SOUNDCLOUD("soundcloud.com", "www.soundcloud.com"),
-	YOUTUBE("youtube.com", "www.youtube.com", "youtu.be"),
+	SOUNDCLOUD("soundcloud.com", "www.soundcloud.com", "m.soundcloud.com"),
+	YOUTUBE("youtube.com", "www.youtube.com", "m.youtube.com", "youtu.be"),
 	MISC(""),
 	MALFORMED;
 	
