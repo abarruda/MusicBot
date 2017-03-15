@@ -93,7 +93,7 @@ public class TermResponseInputHandler {
 	private TextResponse getInactiveTextResponse(String chatId) {
 		return TextResponse.createResponse(
 				chatId, 
-				"You must be active in a chat within the last week to create an Auto Responder", 
+				"You must be active in a chat within the last week to perform this action.", 
 				false, 
 				false);
 	}
@@ -109,6 +109,7 @@ public class TermResponseInputHandler {
 			
 			if (!chatManager.getChatsForUserFromCache(userId).values().contains(chatIdFromButton)) {
 				eventBus.post(getInactiveTextResponse(directChatId));
+				return;
 			}
 			
 			final String chatIdForAutoResponder = queryInfo.data;
@@ -118,9 +119,10 @@ public class TermResponseInputHandler {
 				if (tr.userId == userId) {
 					eventBus.post(TextResponse.createResponse(
 							directChatId, 
-							"Sorry, you have already made a submission, now fuck off and wait a week!", 
+							"Sorry, you have already made a submission for this chat, please wait a week!", 
 							false,
 							false));
+					return;
 				}
 			}
 			
