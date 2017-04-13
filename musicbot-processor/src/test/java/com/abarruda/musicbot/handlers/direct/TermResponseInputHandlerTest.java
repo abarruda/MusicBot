@@ -17,9 +17,8 @@ import com.abarruda.musicbot.message.TelegramMessage.PrivateMessage;
 import com.abarruda.musicbot.persistence.DatabaseFacade;
 import com.abarruda.musicbot.processor.responder.responses.TextResponse;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.eventbus.EventBus;
-
-import jersey.repackaged.com.google.common.collect.Lists;
 
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.eq;

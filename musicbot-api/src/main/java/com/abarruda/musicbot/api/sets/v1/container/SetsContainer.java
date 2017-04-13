@@ -104,7 +104,7 @@ public class SetsContainer extends SetsResource {
 				Iterables.filter(musicSets, 
 						Predicates.and(listOfPredicates)));
 		
-		Collections.sort(filteredMusicSets, Ordering.from(orderByReferences).reversed()); 
+		Collections.sort(filteredMusicSets, Ordering.from(orderByMostRecent)); 
 		
 		return filteredMusicSets;
 	}
