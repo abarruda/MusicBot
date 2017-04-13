@@ -26,6 +26,8 @@ import com.google.inject.Inject;
 public class SetsContainer extends SetsResource {
 	private static final Logger logger = LogManager.getLogger(SetsContainer.class);
 	
+	private static final int POPULAR_COUNT_THRESHOLD = 2;
+	
 	final DatabaseFacade db;
 	
 	@Inject
@@ -48,7 +50,6 @@ public class SetsContainer extends SetsResource {
 	};
 	
 	private static final Predicate<MusicSet> activeSetPredicate = new Predicate<MusicSet>() {
-
 		@Override
 		public boolean apply(MusicSet input) {
 			return input.status.equals(MusicSet.Status.ACTIVE.name());
@@ -58,7 +59,7 @@ public class SetsContainer extends SetsResource {
 	private static final Predicate<MusicSet> popularSetPredicate = new Predicate<MusicSet>() {
 		@Override
 		public boolean apply(MusicSet input) {
-			return (input.references.size() > 2) || input.plays.size() > 2;
+			return (input.references.size() > POPULAR_COUNT_THRESHOLD) || input.plays.size() > POPULAR_COUNT_THRESHOLD;
 		}
 	};
 	
@@ -82,6 +83,25 @@ public class SetsContainer extends SetsResource {
 			@Override
 			public boolean apply(MusicSet input) {
 				return String.valueOf(input.originalUser.userId).equals(userId);
+			}
+		};
+	}
+	
+	private static Predicate<MusicSet> getPlayedByUserPredicate(final String userId) {
+		return new Predicate<MusicSet>() {
+			@Override
+			public boolean apply(MusicSet input) {
+				int playsByUser = 0;
+				for (final MusicSet.Play play : input.plays) {
+					if (Integer.valueOf(userId) == play.userId) {
+						playsByUser++;
+						
+						if (playsByUser > POPULAR_COUNT_THRESHOLD) {
+							return true;
+						}
+					}
+				}
+				return false;
 			}
 		};
 	}
@@ -137,7 +157,8 @@ public class SetsContainer extends SetsResource {
 		return filteredMusicSets;
 	}
 	
-	@Override public Iterable<MusicSet> getBrowsingSetsByChatId(final String chatId, final String userId) {
+	@Override
+	public Iterable<MusicSet> getBrowsingSetsByChatId(final String chatId, final String userId) {
 		final List<Predicate<MusicSet>> listOfPredicates = new ArrayList<Predicate<MusicSet>>();
 		listOfPredicates.add(setPredicate);
 		listOfPredicates.add(activeSetPredicate);
@@ -145,6 +166,23 @@ public class SetsContainer extends SetsResource {
 		if (userId != null) {
 			listOfPredicates.add(getUserSetPredicate(userId));
 		}
+		
+		final List<MusicSet> musicSets = db.getMusicSets(chatId);
+		
+		final List<MusicSet> filteredMusicSets = Lists.newLinkedList(
+				Iterables.filter(musicSets, 
+						Predicates.and(listOfPredicates)));
+		
+		Collections.sort(filteredMusicSets, Ordering.from(orderByMostRecent));
+		return filteredMusicSets;
+	}
+	
+	@Override
+	public Iterable<MusicSet> getUsersFavoritesByChatId (final String chatId, final String userId) {
+		final List<Predicate<MusicSet>> listOfPredicates = new ArrayList<Predicate<MusicSet>>();
+		listOfPredicates.add(setPredicate);
+		listOfPredicates.add(activeSetPredicate);
+		listOfPredicates.add(getPlayedByUserPredicate(userId));
 		
 		final List<MusicSet> musicSets = db.getMusicSets(chatId);
 		

@@ -57,6 +57,18 @@ public abstract class SetsResource {
 			@ApiParam(value = "User to filter by", required = false)
 			@QueryParam(value="userId")
 			final String user);
+	
+	@ApiOperation(value = "Get user's favorite music content")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/{id}/favorites")
+	public abstract Iterable<MusicSet> getUsersFavoritesByChatId(
+			@PathParam(value = "id")
+			final String id,
+			
+			@ApiParam(value = "User to filter by", required = true)
+			@QueryParam(value="userId")
+			final String user);
 
 	@ApiOperation(value = "Play music content")
 	@POST

@@ -36,9 +36,9 @@ public class SetsContainerTest {
 		container = new SetsContainer(mockDb);
 	}
 	
-	private Play newPlay() {
+	private Play newPlay(final int userId) {
 		final Play play = new Play();
-		play.userId = 1;
+		play.userId = userId;
 		play.dateOfPlay = 1;
 		return play;
 	}
@@ -49,19 +49,19 @@ public class SetsContainerTest {
 		
 		final User user1 = new User(1, "test", "user");
 		final RemoteContent content1 = new RemoteContent("remote-content-id-1", "http://" + ContentType.SOUNDCLOUD.hostNames.get(0) + "/1", "SOUNDCLOUD", user1, 1, Lists.newArrayList());
-		final MusicSet set1 = new MusicSet(content1, "ACTIVE", null, Lists.newArrayList(newPlay(), newPlay(), newPlay(), newPlay()));
+		final MusicSet set1 = new MusicSet(content1, "ACTIVE", null, Lists.newArrayList(newPlay(1), newPlay(1), newPlay(1), newPlay(1)));
 		
 		final User user2 = new User(2, "test", "user");
 		final RemoteContent content2 = new RemoteContent("remote-content-id-2", "http://" + ContentType.SOUNDCLOUD.hostNames.get(1) + "/2", "SOUNDCLOUD", user2, 100, Lists.newArrayList());
-		final MusicSet set2 = new MusicSet(content2, "ACTIVE", null, Lists.newArrayList(newPlay(), newPlay(), newPlay()));
+		final MusicSet set2 = new MusicSet(content2, "ACTIVE", null, Lists.newArrayList(newPlay(2), newPlay(2), newPlay(2)));
 		
 		final User user3 = new User(1, "test", "user");
 		final RemoteContent content3 = new RemoteContent("remote-content-id-3", "http://" + ContentType.SOUNDCLOUD.hostNames.get(2) + "/3", "SOUNDCLOUD", user3, 2000, Lists.newArrayList());
-		final MusicSet set3 = new MusicSet(content3, "ACTIVE", null, Lists.newArrayList(newPlay(), newPlay()));
+		final MusicSet set3 = new MusicSet(content3, "ACTIVE", null, Lists.newArrayList(newPlay(3), newPlay(3)));
 		
 		final User user4 = new User(4, "test", "user");
 		final RemoteContent content4 = new RemoteContent("remote-content-id-4", "http://" + ContentType.YOUTUBE.hostNames.get(1) + "/4", "SOUNDCLOUD", user4, 50, Lists.newArrayList());
-		final MusicSet set4 = new MusicSet(content4, "ACTIVE", null, Lists.newArrayList(newPlay(), newPlay(), newPlay(), newPlay(), newPlay()));
+		final MusicSet set4 = new MusicSet(content4, "ACTIVE", null, Lists.newArrayList(newPlay(4), newPlay(4), newPlay(4), newPlay(4), newPlay(4)));
 		
 		when(mockDb.getMusicSets(chatId)).thenReturn(Lists.newArrayList(set3, set1, set2, set4));
 		
@@ -70,6 +70,31 @@ public class SetsContainerTest {
 		final Iterator<MusicSet> sortedSetsIterator = sets.iterator();
 		assertEquals("remote-content-id-2", sortedSetsIterator.next()._id);
 		assertEquals("remote-content-id-4", sortedSetsIterator.next()._id);
+		assertEquals("remote-content-id-1", sortedSetsIterator.next()._id);
+	}
+	
+	@Test
+	public void testUsersFavorites() {
+		final String chatId = "chat-id";
+	
+		final User user1 = new User(1, "test", "user");
+		final RemoteContent content1 = new RemoteContent("remote-content-id-1", "http://" + ContentType.SOUNDCLOUD.hostNames.get(0) + "/1", "SOUNDCLOUD", user1, 1, Lists.newArrayList());
+		final MusicSet set1 = new MusicSet(content1, "ACTIVE", null, Lists.newArrayList(newPlay(2), newPlay(1), newPlay(1), newPlay(1), newPlay(1), newPlay(2)));
+		
+		final User user2 = new User(2, "test", "user");
+		final RemoteContent content2 = new RemoteContent("remote-content-id-2", "http://" + ContentType.SOUNDCLOUD.hostNames.get(1) + "/2", "SOUNDCLOUD", user2, 100, Lists.newArrayList());
+		final MusicSet set2 = new MusicSet(content2, "ACTIVE", null, Lists.newArrayList(newPlay(2), newPlay(2), newPlay(1)));
+		
+		final User user3 = new User(1, "test", "user");
+		final RemoteContent content3 = new RemoteContent("remote-content-id-3", "http://" + ContentType.SOUNDCLOUD.hostNames.get(2) + "/3", "SOUNDCLOUD", user3, 2000, Lists.newArrayList());
+		final MusicSet set3 = new MusicSet(content3, "ACTIVE", null, Lists.newArrayList(newPlay(1), newPlay(1), newPlay(1), newPlay(2)));
+		
+		when(mockDb.getMusicSets(chatId)).thenReturn(Lists.newArrayList(set3, set1, set2));
+		
+		final Iterable<MusicSet> sets = container.getUsersFavoritesByChatId(chatId, "1");
+		
+		final Iterator<MusicSet> sortedSetsIterator = sets.iterator();
+		assertEquals("remote-content-id-3", sortedSetsIterator.next()._id);
 		assertEquals("remote-content-id-1", sortedSetsIterator.next()._id);
 	}
 

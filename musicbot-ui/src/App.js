@@ -7,7 +7,7 @@ import $ from 'jquery';
 import {Alert} from 'react-bootstrap';
 import {Button} from 'react-bootstrap';
 import {Grid, Row} from 'react-bootstrap';
-import {Nav, Navbar, NavDropdown, MenuItem} from 'react-bootstrap';
+import {Nav, Navbar, NavDropdown, NavItem, MenuItem} from 'react-bootstrap';
 import {Image} from 'react-bootstrap';
 import ReactSwipe from 'react-swipe';
 import './config/globalConfigs';
@@ -141,6 +141,12 @@ class App extends Component {
     this.loadMusic(url);
   }
 
+  loadFavorites(chatId, userId) {
+    let type = 'favorites';
+    let url = apiUrl + 'sets/v1/'+ chatId + '/' + type + '?userId=' + userId;
+    this.loadMusic(url);
+  }
+
   handleCarouselChange(selectedIndex, event) {
     this.setState({carouselIndex: selectedIndex, carouselDirection: event.direction});
   }
@@ -202,6 +208,8 @@ class App extends Component {
       this.loadRecentMusicSets(this.state.chatId, "P7D", user);
     } else if (type === "popular") {
       this.loadPopularMusicSets(this.state.chatId, user);
+    } else if (type === "favorites") {
+      this.loadFavorites(this.state.chatId, this.state.userId)
     } else {
       this.loadBrowsingMusicSets(this.state.chatId, user);
     }
@@ -260,6 +268,7 @@ class App extends Component {
                     <MenuItem header>By Person</MenuItem>
                     {this.renderUsers("browse")}
                   </NavDropdown>
+                  <NavItem eventKey="favorites_" title="My Favorites">My Favorites</NavItem>
                 </Nav>
               </Navbar.Collapse>
 
